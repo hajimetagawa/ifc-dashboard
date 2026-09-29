@@ -13,6 +13,7 @@ dependencies = [
     "duckdb",            # SQLによる集計・保存
     "streamlit",         # ダッシュボード
     "plotly",            # インタラクティブなグラフ
+    "pymupdf",           # PDF本文のブロック単位での抽出（段組み対応）
 ]
 
 [dependency-groups]

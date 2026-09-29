@@ -53,3 +53,12 @@ uv add <ライブラリ名>
 IFCの地域区分は、MCT（Middle East and Central Asia）のみIFC公式ページの国一覧に基づく。
 それ以外は世界銀行の地域からの暫定割り当てで、根拠は `ifc_region_basis` 列に記録している。
 対応表の元は `sources/ifc_regions.csv` と `sources/country_overrides.csv`。
+
+## PDFレポートの追加手順
+
+1. PDFを `data/raw/pdf/` に置く（ファイル自体は加工しない）
+2. `sources/pdf_manifest.csv` に1行追記する（`doc_id` は一意な名前。対象外にする場合は `include` を `no`）
+3. `uv run python src/extract_pdfs.py` を実行する（新規・差し替えられたPDFだけが処理される）
+
+抽出結果は `data/curated/ifc.duckdb` の `documents`・`doc_blocks` テーブルと、
+本文の英語の段落だけに絞った `doc_text` ビューに格納される。

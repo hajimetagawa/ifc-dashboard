@@ -1,1 +1,7 @@
-file_name,title,publisher,fiscal_year,source_url,downloaded_on,notes
+doc_id,file_name,title,publisher,doc_type,pub_date,countries,language,layout,source_url,downloaded_on,include,notes
+TUR_CCDR_2022,Türkiye Country Climate and Development Report.pdf,Türkiye Country Climate and Development Report,IFC,Country Climate and Development Report,2022-06,TUR,en,standard,,2026-09-29,yes,
+TUR_ASYAPORT_2020,case-study-asyaport-turkey.pdf,Exploring Client Approaches to Gender-Based Violence Prevention and Response: Asyaport Infrastructure,IFC,Case study,2020-10,TUR,en,sidebar,,2026-09-29,yes,1ページ目に指標の枠組みあり
+KGZ_ISLAMICFIN_2016,islamic-banking-kyrgyz.pdf,Islamic Banking and Finance: Opportunities across Micro- Small and Medium Enterprises in the Kyrgyz Republic,IFC,Sector study,2016-02,KGZ,en,multi_column,,2026-09-29,yes,表紙のみロシア語併記（本文は英語）。本文は多段組み
+KAZ_CPSD_2017,kazakhstan-cantory private sector diagnostic-2017.pdf,Creating Markets in Kazakhstan: Country Private Sector Diagnostic,IFC,Country Private Sector Diagnostic,2017-11,KAZ,en,standard,,2026-09-29,yes,表紙に「最終化前に追加協議を行う」との記載あり（最終版かは要確認）
+UZB_CPSD_2026,uzbekistan-private-sector-diagnostic-en.pdf,Uzbekistan: Country Private Sector Diagnostic,IFC,Country Private Sector Diagnostic,2026-07,UZB,en,standard,,2026-09-29,yes,見出しの文字が二重に埋め込まれている
+TJK_WOMENFIN_2022,women-markets-for-financial-services-Tajikistan.pdf,Market Research to Assess the Business Opportunity of Women's Markets for Financial Services in Tajikistan,IFC,Market study,2022,TJK,en,standard,,2026-09-29,yes,
