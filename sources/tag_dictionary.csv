@@ -1,0 +1,26 @@
+tag_type,tag,pattern,notes
+sector,Financial Markets,"\bbank(s|ing)?\b|\bfinancial (institution|sector|intermediar)|\blend(ing|ers?)\b|\bcredit\b|\binsurance\b|\bleasing\b|\bmicrofinance\b",案件データの industry と同じ名称
+sector,Infrastructure,"\binfrastructure\b|\benergy\b|\belectricity\b|\bpower (plant|sector|generation|grid)|\btransport\b|\bports?\b|\blogistics\b|\bwater supply\b|\butilit(y|ies)\b|\brenewable",同上
+sector,Agribusiness and Forestry,"\bagri(culture|cultural|business|food)?\b|\bfarm(s|ers?|ing)?\b|\bforestry\b|\bcrops?\b|\blivestock\b|\birrigation\b|\bfood process",同上
+sector,Manufacturing,"\bmanufactur|\bindustrial production\b|\btextiles?\b|\bchemicals?\b|\bcement\b|\bautomotive\b",同上
+sector,Funds,"\bprivate equity\b|\bventure capital\b|\binvestment funds?\b|\bfund managers?\b",同上
+sector,"Tourism, Retail and Property","\btourism\b|\bhotels?\b|\bretail\b|\breal estate\b|\b(residential|commercial) propert(y|ies)\b|\bproperty (market|development|developers?)\b|\bhousing\b",同上
+sector,"Health, Education and Life Sciences","\bhealth ?care\b|\bhealth (sector|services|system|facilities)\b|\bhospitals?\b|\bpharma|\beducation\b|\bschools?\b|\buniversit(y|ies)\b",同上
+sector,Telecommunications and Technology,"\btelecom|\bbroadband\b|\bICT\b|\binternet\b|\bmobile networks?\b|\bdata cent(er|re)s?\b",同上
+sector,Metals and Mining,"\bmining\b|\bminerals?\b|\bmetals?\b|\bgold\b|\bcopper\b|\buranium\b",同上
+theme,MSME finance,"\bM?SMEs?\b|\bsmall and medium\b|\bmicro,? small\b",中小零細企業向け金融
+theme,Microfinance,"\bmicrofinance\b|\bMFIs?\b|\bmicrocredit\b|\bmicroloans?\b",
+theme,Islamic finance,"\bislamic (bank|financ)|\bsharia|\bshari'a|\bsukuk\b|\bmurabaha\b|\bijara\b",
+theme,Digital finance,"\bdigital (payment|financial|finance|bank)|\bfintech\b|\bmobile money\b|\be-money\b",
+theme,Access to finance,"\baccess to (finance|credit|financial)|\bfinancial inclusion\b|\bunbanked\b|\bcollateral\b",
+theme,Asset quality and credit risk,"\bnon-performing\b|\bNPLs?\b|\basset quality\b|\bloan loss|\bprovisioning\b|\bcredit risk\b",
+theme,Capital markets,"\bcapital markets?\b|\bbond markets?\b|\bstock exchange\b|\bsecurities market",
+theme,Regulation and supervision,"\bregulat(ion|ory|or|ors)\b|\bsupervis(ion|ory)\b|\bcentral bank\b|\bprudential\b|\bBasel\b",
+theme,Trade finance,"\btrade financ",
+theme,Gender,"\bwomen\b|\bfemale\b|\bgender\b",
+theme,Climate,"\bclimate\b|\bgreen (financ|bond|invest|growth)|\bemissions?\b|\bdecarboni[sz]|\brenewable|\badaptation\b",
+theme,State-owned enterprises,"\bstate-owned\b|\bSOEs?\b|\bstate enterprises?\b|\bprivati[sz]",
+theme,Informality,"\binformal (sector|economy|lend|employment|firms?)|\binformality\b",
+theme,Macro and FX risk,"\bexchange rates?\b|\bcurrency (risk|depreciation|devaluation)|\bdollari[sz]|\binflation\b|\bdevaluation\b",
+theme,Remittances,"\bremittances?\b",
+theme,Jobs,"\bjobs?\b|\bemployment\b|\bunemployment\b",

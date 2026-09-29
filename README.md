@@ -62,3 +62,34 @@ IFCの地域区分は、MCT（Middle East and Central Asia）のみIFC公式ペ�
 
 抽出結果は `data/curated/ifc.duckdb` の `documents`・`doc_blocks` テーブルと、
 本文の英語の段落だけに絞った `doc_text` ビューに格納される。
+
+## 本文へのタグ付けと案件データとの結合
+
+```powershell
+uv run python src/tag_blocks.py
+```
+
+本文の段落（英語）に、国・セクター・テーマのタグを辞書で付ける。有料のAIサービスは使わない。
+
+| 辞書 | 内容 |
+|---|---|
+| `sources/tag_dictionary.csv` | セクター（名称は案件データの `industry` と同じ）とテーマの判定語句（正規表現） |
+| `sources/country_aliases.csv` | 国名の別表記（Turkey / Türkiye など） |
+
+辞書を編集して再実行すると、タグはすべて作り直される。
+
+| 名前 | 種類 | 内容 |
+|---|---|---|
+| `block_tags` | テーブル | 段落ごとのタグ |
+| `evidence` | ビュー | 段落の本文とタグを1行にまとめたもの（ダッシュボード表示用） |
+| `country_sector_evidence` | ビュー | 国×セクターの段落数・資料数。`projects_enriched` と `iso3`・`industry` で結合できる |
+| `country_theme_evidence` | ビュー | 国×テーマの段落数・資料数 |
+
+## 全体の実行順序
+
+```powershell
+uv run python src/fetch_projects.py      # 案件データ
+uv run python src/build_country_ref.py   # 国・地域の対応表
+uv run python src/extract_pdfs.py        # PDF本文
+uv run python src/tag_blocks.py          # タグ付け
+```

@@ -149,7 +149,10 @@ def main() -> None:
     wb = wb_table(records)
     with duckdb.connect(str(DB_PATH)) as con:
         countries = build(wb, con)
-        con.execute("CREATE OR REPLACE TABLE countries AS SELECT * EXCLUDE (n_projects) FROM countries")
+        # 既存の countries テーブルと名前が衝突しないよう、別名で登録してから書き込む
+        con.register("countries_new", countries)
+        con.execute("CREATE OR REPLACE TABLE countries AS SELECT * EXCLUDE (n_projects) FROM countries_new")
+        con.unregister("countries_new")
         con.execute("""
             CREATE OR REPLACE VIEW projects_enriched AS
             SELECT p.*, c.iso3, c.wb_region, c.income_level, c.lending_type,
