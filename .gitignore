@@ -1,0 +1,19 @@
+# 仮想環境（uv sync で再現できる）
+.venv/
+
+# データ（再取得・再生成できるためGitでは管理しない）
+data/raw/**
+data/extracted/**
+data/curated/**
+!data/**/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 秘密情報・OS/エディタのファイル
+.env
+.DS_Store
+Thumbs.db
+.vscode/

@@ -1,0 +1,21 @@
+[project]
+name = "ifc-dashboard"
+version = "0.1.0"
+description = "IFC公表データ（構造化データ＋PDFレポート）を統合したインタラクティブ・ダッシュボード"
+readme = "README.md"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "markitdown[pdf]",   # PDF本文 -> Markdown
+    "pdfplumber",        # PDF内の表の抽出
+    "requests",          # データのダウンロード
+    "pandas",            # データ整形
+    "pyarrow",           # Parquet形式での保存
+    "duckdb",            # SQLによる集計・保存
+    "streamlit",         # ダッシュボード
+    "plotly",            # インタラクティブなグラフ
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel",         # VS CodeでJupyterノートブックを使うため
+]
