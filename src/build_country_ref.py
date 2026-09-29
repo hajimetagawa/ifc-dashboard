@@ -113,13 +113,13 @@ def build(wb: pd.DataFrame, con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
         wb_region = o["wb_region"] if o is not None and pd.notna(o["wb_region"]) else (w["wb_region"] if w is not None else None)
 
         if o is not None and pd.notna(o["ifc_region"]):
-            ifc_region, basis = o["ifc_region"], "地域案件（案件の国名から判断）"
+            ifc_region, basis = o["ifc_region"], "Regional project (from project country name)"
         elif iso3 is not None and iso3 in ifc.index:
             ifc_region, basis = ifc.loc[iso3, "ifc_region"], ifc.loc[iso3, "status"]
         elif wb_region in WB_TO_IFC_PROVISIONAL:
-            ifc_region, basis = WB_TO_IFC_PROVISIONAL[wb_region], "暫定（世界銀行の地域から推定）"
+            ifc_region, basis = WB_TO_IFC_PROVISIONAL[wb_region], "Provisional (inferred from World Bank region)"
         else:
-            ifc_region, basis = None, "要確認"
+            ifc_region, basis = None, "To be confirmed"
 
         out.append({
             "country": c, "wb_country_code": code, "iso3": iso3, "match_method": match,
@@ -167,7 +167,7 @@ def main() -> None:
     print("\nIFCの地域 × 割り当ての根拠（案件数）:")
     print(countries.pivot_table(index="ifc_region", columns="ifc_region_basis", values="n_projects",
                                 aggfunc="sum", fill_value=0, dropna=False).to_string())
-    todo = countries[(countries["ifc_region_basis"] == "要確認") | (countries["match_method"] == "照合できず")]
+    todo = countries[(countries["ifc_region_basis"].str.startswith("To be confirmed").fillna(False)) | (countries["match_method"] == "照合できず")]
     if len(todo):
         print("\n※確認が必要な国名（sources/country_overrides.csv に追記すると解消できます）:")
         print(todo[["country", "wb_country_code", "match_method", "wb_region", "ifc_region_basis", "n_projects"]].to_string(index=False))

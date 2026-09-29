@@ -60,6 +60,8 @@ IFCの地域区分は、MCT（Middle East and Central Asia）のみIFC公式ペ�
 2. `sources/pdf_manifest.csv` に1行追記する（`doc_id` は一意な名前。対象外にする場合は `include` を `no`）
 3. `uv run python src/extract_pdfs.py` を実行する（新規・差し替えられたPDFだけが処理される）
 
+定型文（About IFC、著作権表示など）の言い回しは `sources/boilerplate_phrases.csv` で指定し、本文から除外する。
+
 抽出結果は `data/curated/ifc.duckdb` の `documents`・`doc_blocks` テーブルと、
 本文の英語の段落だけに絞った `doc_text` ビューに格納される。
 
@@ -93,3 +95,12 @@ uv run python src/build_country_ref.py   # 国・地域の対応表
 uv run python src/extract_pdfs.py        # PDF本文
 uv run python src/tag_blocks.py          # タグ付け
 ```
+
+## ダッシュボード
+
+```powershell
+uv run streamlit run app/app.py
+```
+
+ブラウザで http://localhost:8501 が開く。既定の表示は MCT（Middle East and Central Asia）× Financial Markets。
+画面左の絞り込みで、地域・業種・年度・ステータスを変更できる。

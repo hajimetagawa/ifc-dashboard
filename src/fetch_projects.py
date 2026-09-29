@@ -11,6 +11,8 @@ IFC Investment Services Projects（Finances One DS00499）を取得し、整形�
     data/curated/ifc.duckdb                         … SQLで集計するためのDB
         projects        : 開示文書単位（元データと同じ粒度）
         projects_unique : 案件単位（1案件1行。金額の集計はこちらを使う）
+    金額の集計には approved_usd_m_for_sum を使う（プログラム全体の枠と判定した金額を除いたもの。
+    判定の根拠は amount_basis 列）
 
 API仕様: https://financesone.worldbank.org/api-explorer?id=DS00499
     認証不要 / 1回あたり最大1,000件（top と skip でページ分割）
@@ -49,6 +51,13 @@ RENAME = {
     "board_approval___fiscal_year": "approval_fy",
     "board_approval___calendar_year": "approval_cy",
 }
+# プログラム全体の承認枠が参加先ごとに繰り返し記録されている案件の判定
+# （例: GTFP は各参加銀行に70億ドルが記録されており、合計すると大幅な過大計上になる）
+PROGRAM_MIN_GROUP = 4          # 同額・同日の案件がこの件数以上
+PROGRAM_MIN_AMOUNT = 100.0     # かつ金額がこの値（百万ドル）以上
+PROGRAM_NAME_PREFIXES = ("GTFP",)
+AMOUNT_OVERRIDES = ROOT / "sources" / "amount_overrides.csv"
+
 DATE_COLS = [
     "as_of_date", "date_disclosed", "ifc_approval_date", "ifc_invested_date",
     "ifc_signed_date", "projected_board_date",
@@ -124,6 +133,34 @@ def tidy(records: list[dict]) -> pd.DataFrame:
             df["approval_fy"] = computed
     if "approval_cy" in df.columns:
         df["approval_cy"] = pd.to_numeric(df["approval_cy"], errors="coerce").astype("Int64")
+    return flag_program_amounts(df)
+
+
+def flag_program_amounts(df: pd.DataFrame) -> pd.DataFrame:
+    """プログラム全体の枠と考えられる金額を判定し、集計用の金額列を作る。"""
+    if "total_approved_usd_m" not in df.columns:
+        return df
+    uniq = df.drop_duplicates("project_number")[["project_number", "total_approved_usd_m", "ifc_approval_date"]]
+    size = (uniq.dropna(subset=["total_approved_usd_m", "ifc_approval_date"])
+                .groupby(["total_approved_usd_m", "ifc_approval_date"])["project_number"].transform("count"))
+    uniq = uniq.assign(same_amount_group_size=size.reindex(uniq.index).fillna(1).astype("Int64"))
+    df = df.merge(uniq[["project_number", "same_amount_group_size"]], on="project_number", how="left")
+
+    by_name = df["project_name"].fillna("").str.upper().str.startswith(PROGRAM_NAME_PREFIXES)
+    by_repeat = ((df["same_amount_group_size"] >= PROGRAM_MIN_GROUP)
+                 & (df["total_approved_usd_m"] >= PROGRAM_MIN_AMOUNT))
+    df["amount_basis"] = "Individual"
+    df.loc[by_repeat, "amount_basis"] = "Program-level (same amount and date repeated)"
+    df.loc[by_name, "amount_basis"] = "Program-level (identified by project name)"
+
+    # 手作業での上書き（sources/amount_overrides.csv。amount_basis に Individual または Program-level を記入）
+    if AMOUNT_OVERRIDES.exists():
+        ov = pd.read_csv(AMOUNT_OVERRIDES, dtype=str).dropna(subset=["project_number"])
+        for r in ov.itertuples():
+            df.loc[df["project_number"] == r.project_number.strip(), "amount_basis"] = f"{r.amount_basis.strip()} (manual)"
+
+    is_program = df["amount_basis"].str.startswith("Program-level")
+    df["approved_usd_m_for_sum"] = df["total_approved_usd_m"].mask(is_program)
     return df
 
 
@@ -137,6 +174,13 @@ def summarize(df: pd.DataFrame) -> None:
     print("\n列ごとの欠損率:")
     for col, rate in df.isna().mean().sort_values(ascending=False).items():
         print(f"  {col:<28} {rate:6.1%}")
+    if "amount_basis" in df.columns:
+        u = df.drop_duplicates("project_number")
+        prog = u[u["amount_basis"].str.startswith("Program-level")]
+        print(f"\nプログラム枠と判定した案件: {len(prog):,} 件"
+              f"（承認額 {prog['total_approved_usd_m'].sum():,.0f} 百万ドルを集計から除外。"
+              f"全体の {prog['total_approved_usd_m'].sum() / max(u['total_approved_usd_m'].sum(), 1):.0%}）")
+        print(f"集計に使う承認額の合計: {u['approved_usd_m_for_sum'].sum():,.0f} 百万ドル")
     for col in ["status", "product_line", "industry"]:
         if col in df.columns:
             print(f"\n{col} の内訳（上位10）:")

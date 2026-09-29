@@ -20,7 +20,8 @@
     paragraph   … 12語以上の文章
     short       … 見出し、図表のラベルなど
     caption     … 図表の見出し・出典・注記（Figure / Table / Source / Note などで始まるもの）
-    boilerplate … 多くのページに繰り返し出てくる文字列（ヘッダー、フッター、ページ番号など）
+    boilerplate … 多くのページに繰り返し出てくる文字列（ヘッダー、フッター、ページ番号など）や、
+                  複数の資料に同じ文章で出てくる定型文（About IFC など）
 """
 
 from __future__ import annotations
@@ -39,6 +40,7 @@ import pymupdf
 ROOT = Path(__file__).resolve().parents[1]
 PDF_DIR = ROOT / "data" / "raw" / "pdf"
 MANIFEST = ROOT / "sources" / "pdf_manifest.csv"
+BOILERPLATE_PHRASES = ROOT / "sources" / "boilerplate_phrases.csv"
 DB_PATH = ROOT / "data" / "curated" / "ifc.duckdb"
 
 PARAGRAPH_MIN_WORDS = 12
@@ -110,8 +112,12 @@ def extract_document(path: Path, doc_id: str) -> tuple[int, pd.DataFrame]:
     # ページ番号だけのブロック
     is_boiler |= df["text"].str.fullmatch(r"[\divxlcIVXLC\s\-–|/.]+")
 
+    # 単語の大半が数字のブロック（図表の数値など）は段落として扱わない
+    alpha_ratio = df["text"].str.split().apply(
+        lambda ws: sum(any(ch.isalpha() for ch in w) for w in ws) / max(len(ws), 1))
+
     df["kind"] = "short"
-    df.loc[df["n_words"] >= PARAGRAPH_MIN_WORDS, "kind"] = "paragraph"
+    df.loc[(df["n_words"] >= PARAGRAPH_MIN_WORDS) & (alpha_ratio >= 0.5), "kind"] = "paragraph"
     # 図表の見出し・出典・注記（本文とは分けて扱う）
     is_caption = df["text"].str.match(r"(?i)^(figure|fig\.|table|box|chart|source|sources|note|notes)\b")
     df.loc[is_caption, "kind"] = "caption"
@@ -210,6 +216,27 @@ def main() -> None:
                   f" / 本文として使う英語の段落 {en_par:,}")
             if en_par == 0:
                 print("      ※英語の段落が抽出できていません。スキャンPDFなどの可能性があります")
+
+        # 資料をまたいで同じ文章が出てくる段落（「About IFC」などの定型文）を本文から外す
+        # 判定: 先頭100文字が同じ段落が2つ以上の資料にある
+        con.execute("""
+            UPDATE doc_blocks SET kind = 'boilerplate'
+            WHERE kind = 'paragraph' AND left(lower(text), 100) IN (
+                SELECT left(lower(text), 100) FROM doc_blocks
+                WHERE kind = 'paragraph' AND n_words >= 12
+                GROUP BY 1 HAVING count(DISTINCT doc_id) >= 2
+            )
+        """)
+        # 定型文の言い回し（sources/boilerplate_phrases.csv。. は任意の1文字に一致）
+        if BOILERPLATE_PHRASES.exists():
+            for phrase in pd.read_csv(BOILERPLATE_PHRASES, dtype=str)["phrase"].dropna():
+                con.execute("UPDATE doc_blocks SET kind = 'boilerplate' "
+                            "WHERE kind = 'paragraph' AND regexp_matches(lower(text), ?)",
+                            [phrase.strip().lower()])
+        n_shared = con.execute(
+            "SELECT count(*) FROM doc_blocks WHERE kind = 'boilerplate' AND n_words >= 12").fetchone()[0]
+        if n_shared:
+            print(f"定型文と判定した段落（資料間で共通・定型の言い回し）: {n_shared:,}")
 
         total = con.execute("SELECT count(DISTINCT doc_id), count(*) FROM doc_text").fetchone()
         print(f"\n本文データ（doc_text）: {total[0]} 資料 / {total[1]:,} 段落")
