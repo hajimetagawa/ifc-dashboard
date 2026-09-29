@@ -1,7 +1,7 @@
 [project]
 name = "ifc-dashboard"
 version = "0.1.0"
-description = "IFC公表データ（構造化データ＋PDFレポート）を統合したインタラクティブ・ダッシュボード"
+description = "Interactive dashboard combining IFC project data with text from IFC publications"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
 dependencies = [
