@@ -72,6 +72,7 @@ uv run python src/fetch_projects.py      # 1. project data from the Finances One
 uv run python src/build_country_ref.py   # 2. regions, income groups, IFC regions
 uv run python src/extract_pdfs.py        # 3. text from PDF reports in data/raw/pdf/
 uv run python src/tag_blocks.py          # 4. country / industry / theme tags
+uv run python src/export_powerbi.py      # 5. (optional) Parquet files for Power BI
 uv run streamlit run app/app.py          # dashboard at http://localhost:8501
 ```
 
@@ -132,6 +133,34 @@ Edit these files and re-run the relevant script to apply changes.
   with report title and page number.
 - **Project list** – all projects matching the filters, downloadable as CSV.
 - **Notes on the data** – the caveats above, for readers of the dashboard.
+
+## Using the data in Power BI
+
+`src/export_powerbi.py` writes a star schema of Parquet files to `data/curated/powerbi/`,
+so the same data can be analysed in Power BI Desktop without connecting to DuckDB directly
+(the export opens the database read-only).
+
+| File | Grain | Key |
+|---|---|---|
+| `projects.parquet` | one row per project | `project_number` |
+| `countries.parquet` | one row per country, including countries without IFC projects | `iso3` |
+| `industries.parquet` | one row per industry | `industry` |
+| `documents.parquet` | one row per report | `doc_id` |
+| `paragraphs.parquet` | one row per paragraph | `paragraph_id` |
+| `paragraph_countries.parquet` | paragraph × country (report country or mentioned in text) | – |
+| `paragraph_industries.parquet` | paragraph × industry tag | – |
+| `paragraph_themes.parquet` | paragraph × theme tag | – |
+
+Relationships (many-to-one):
+
+- `projects[iso3]` → `countries[iso3]`; `projects[industry]` → `industries[industry]`
+- `paragraphs[doc_id]` → `documents[doc_id]`
+- `paragraph_countries`, `paragraph_industries`, `paragraph_themes` → `paragraphs[paragraph_id]`
+  (set cross-filter direction to *Both*)
+- `paragraph_countries[iso3]` → `countries[iso3]`; `paragraph_industries[industry]` → `industries[industry]`
+
+Use `approved_usd_m_for_sum` for amount measures, e.g. `Approved (US$m) = SUM(projects[approved_usd_m_for_sum])`.
+Summing `total_approved_usd_m` includes program-level ceilings and overstates totals.
 
 ## Tech stack
 

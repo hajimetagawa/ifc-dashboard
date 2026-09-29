@@ -93,7 +93,12 @@ def build(wb: pd.DataFrame, con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
 
     by_iso2 = wb.set_index("iso2")
     by_iso3 = wb.set_index("iso3")
-    by_name = {norm(n): i for i, n in zip(wb["iso3"], wb["wb_name"])}
+    # 国名での照合は、正規化した名前が1つの国にだけ対応する場合に限る
+    # （例: "Congo, Dem. Rep." と "Congo, Rep." はどちらも "congo" になるため照合に使わない）
+    name_map: dict[str, set[str]] = {}
+    for i, n in zip(wb["iso3"], wb["wb_name"]):
+        name_map.setdefault(norm(n), set()).add(i)
+    by_name = {k: next(iter(v)) for k, v in name_map.items() if len(v) == 1}
 
     out = []
     for _, r in data.iterrows():

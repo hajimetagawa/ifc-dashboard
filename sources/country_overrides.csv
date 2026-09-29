@@ -3,6 +3,7 @@ West Bank and Gaza,PSE,,,データの国コード GZ はISOコード（PS）と�
 "Yemen, Republic of",YEM,,,データの国コード RY はISOコード（YE）と異なる
 Czechia,CZE,,,データに国コードなし
 Federal Republic of Somalia,SOM,,,データに国コードなし
+"Congo, Democratic Republic of",COD,,,データの国コード ZR は旧国名（ザイール）のコード。国名の照合ではコンゴ共和国と区別できない
 "Middle East, Pakistan, and Afg Region",,Multi-country (regional),Middle East and Central Asia,IFCの地域案件
 Central Asia and Turkiye Region,,Multi-country (regional),Middle East and Central Asia,IFCの地域案件
 Latin America and the Caribbean Region,,Multi-country (regional),Latin America and the Caribbean,IFCの地域案件
