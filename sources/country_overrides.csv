@@ -1,0 +1,21 @@
+data_country,iso3,wb_region,ifc_region,notes
+West Bank and Gaza,PSE,,,データの国コード GZ はISOコード（PS）と異なる
+"Yemen, Republic of",YEM,,,データの国コード RY はISOコード（YE）と異なる
+Czechia,CZE,,,データに国コードなし
+Federal Republic of Somalia,SOM,,,データに国コードなし
+"Middle East, Pakistan, and Afg Region",,複数国（地域案件）,Middle East and Central Asia,IFCの地域案件
+Central Asia and Turkiye Region,,複数国（地域案件）,Middle East and Central Asia,IFCの地域案件
+Latin America and the Caribbean Region,,複数国（地域案件）,Latin America and the Caribbean,IFCの地域案件
+Central America Subregion,,複数国（地域案件）,Latin America and the Caribbean,IFCの地域案件
+Caribbean Subregion,,複数国（地域案件）,Latin America and the Caribbean,IFCの地域案件
+Southern Europe Subregion,,複数国（地域案件）,Europe,IFCの地域案件
+Eastern Europe Subregion,,複数国（地域案件）,Europe,IFCの地域案件
+Central Europe Subregion,,複数国（地域案件）,Europe,IFCの地域案件
+Europe Region,,複数国（地域案件）,Europe,IFCの地域案件
+Southeast Asia Subregion,,複数国（地域案件）,East Asia and Pacific,IFCの地域案件
+South Asia Region,,複数国（地域案件）,South Asia,IFCの地域案件
+Southern Africa Region,,複数国（地域案件）,Africa,IFCの地域案件
+"Cen Afr, and Anglophne W Africa Region",,複数国（地域案件）,Africa,IFCの地域案件
+North Africa and Horn of Africa Region,,複数国（地域案件）,Africa,IFCの地域案件
+Country Name Pending,,不明,不明,国名未確定
+Unknown,,不明,不明,国名不明
