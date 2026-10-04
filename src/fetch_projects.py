@@ -11,6 +11,7 @@ IFC Investment Services Projects（Finances One DS00499）を取得し、整形�
     data/curated/ifc.duckdb                         … SQLで集計するためのDB
         projects        : 開示文書単位（元データと同じ粒度）
         projects_unique : 案件単位（1案件1行。金額の集計はこちらを使う）
+        project_instruments : 案件 × 投融資手段（融資・株式・保証・リスク管理商品）ごとの承認額
     金額の集計には approved_usd_m_for_sum を使う（プログラム全体の枠と判定した金額を除いたもの。
     判定の根拠は amount_basis 列）
     年度の絞り込みには board_fy を使う（承認前の案件は理事会の予定日の年度。根拠は board_fy_basis 列）
@@ -58,6 +59,17 @@ PROGRAM_MIN_GROUP = 4          # 同額・同日の案件がこの件数以上
 PROGRAM_MIN_AMOUNT = 100.0     # かつ金額がこの値（百万ドル）以上
 PROGRAM_NAME_PREFIXES = ("GTFP",)
 AMOUNT_OVERRIDES = ROOT / "sources" / "amount_overrides.csv"
+BUSINESS_LINE_RULES = ROOT / "sources" / "business_line_rules.csv"
+
+# コミットの段階（ステータスから判定）
+#   Committed: 署名済み（実行中・完了・実行待ち）
+#   Pipeline : 理事会承認済みで署名待ち、または理事会の承認待ち
+#   On hold  : 保留中
+COMMITMENT_STAGE = {
+    "Active": "Committed", "Completed": "Committed", "Pending Disbursement": "Committed",
+    "Pending Signing": "Pipeline", "Pending Approval": "Pipeline",
+    "Hold": "On hold",
+}
 
 DATE_COLS = [
     "as_of_date", "date_disclosed", "ifc_approval_date", "ifc_invested_date",
@@ -143,7 +155,37 @@ def tidy(records: list[dict]) -> pd.DataFrame:
         df["board_fy_basis"] = pd.Series(pd.NA, index=df.index, dtype="string")
         df.loc[df["approval_fy"].notna(), "board_fy_basis"] = "Approved"
         df.loc[df["approval_fy"].isna() & projected_fy.notna(), "board_fy_basis"] = "Projected"
+
+    if "status" in df.columns:
+        df["commitment_stage"] = df["status"].map(COMMITMENT_STAGE).fillna("Other").astype("string")
+    if "department" in df.columns:
+        df = classify_department(df)
     return flag_program_amounts(df)
+
+
+def classify_department(df: pd.DataFrame) -> pd.DataFrame:
+    """部署名から部署（コードと下位の課を除いた名称）と事業部門を取り出す。
+
+    仮定: 事業部門は部署名に含まれるキーワードで決まり、組織再編で名称が変わっても同じとみなす。
+    規則は sources/business_line_rules.csv（priority の小さい順に照合し、最初に当てはまったもの）。
+    """
+    dept = df["department"].astype("string")
+    # 例: "CF5CT - Regional Industry FIG MCT/FIG Central Asia & Turkey"
+    #   → 部署 "Regional Industry FIG MCT"、下位の課 "FIG Central Asia & Turkey"
+    no_code = dept.str.replace(r"^[A-Z0-9]{5} - ", "", regex=True)
+    has_code = dept.str.match(r"^[A-Z0-9]{5} - ").fillna(False)
+    df["dept_name"] = no_code.where(~has_code, no_code.str.split("/", n=1).str[0]).str.strip()
+    df["dept_subunit"] = no_code.str.split("/", n=1).str[1].where(has_code).str.strip()
+
+    df["business_line"] = pd.Series("Other", index=df.index, dtype="string")
+    if BUSINESS_LINE_RULES.exists():
+        rules = pd.read_csv(BUSINESS_LINE_RULES, dtype=str).sort_values("priority", key=lambda s: s.astype(int))
+        assigned = pd.Series(False, index=df.index)
+        for r in rules.itertuples():
+            hit = df["dept_name"].str.contains(r.pattern, regex=True).fillna(False) & ~assigned
+            df.loc[hit, "business_line"] = r.business_line
+            assigned |= hit
+    return df
 
 
 def flag_program_amounts(df: pd.DataFrame) -> pd.DataFrame:
@@ -205,6 +247,12 @@ def summarize(df: pd.DataFrame) -> None:
               f"（承認額 {prog['total_approved_usd_m'].sum():,.0f} 百万ドルを集計から除外。"
               f"全体の {prog['total_approved_usd_m'].sum() / max(u['total_approved_usd_m'].sum(), 1):.0%}）")
         print(f"集計に使う承認額の合計: {u['approved_usd_m_for_sum'].sum():,.0f} 百万ドル")
+    for col in ["commitment_stage", "business_line"]:
+        if col in df.columns:
+            u = df.drop_duplicates("project_number")
+            print(f"\n{col} の内訳（案件数・集計用の承認額 百万ドル）:")
+            print(u.groupby(col, dropna=False).agg(n=("project_number", "count"),
+                                                   usd_m=("approved_usd_m_for_sum", "sum")).round(0).to_string())
     for col in ["status", "product_line", "industry"]:
         if col in df.columns:
             print(f"\n{col} の内訳（上位10）:")
@@ -238,6 +286,9 @@ def main() -> None:
     db_path = CURATED_DIR / "ifc.duckdb"
     with duckdb.connect(str(db_path)) as con:
         con.execute("CREATE OR REPLACE TABLE projects AS SELECT * FROM df")
+        # 承認額を投融資手段ごとに縦長に展開（1案件に複数の手段がある場合があるため）
+        #   内訳の合計が承認額の合計に満たない分は "Unallocated"、金額が何もない案件は "Not specified"（金額なし）
+        #   プログラム枠と判定した案件は、集計用の金額（approved_usd_m_for_sum）を空欄にする
         # 同じ案件に開示文書が2件ある場合（2006年方針と2012年方針）があるため、
         # 案件単位の集計用に1案件1行のビューを作る（2012年方針の文書を優先）
         con.execute("""
@@ -250,6 +301,28 @@ def main() -> None:
                 ) AS rn
                 FROM projects
             ) WHERE rn = 1
+        """)
+        con.execute("""
+            CREATE OR REPLACE TABLE project_instruments AS
+            WITH u AS (
+                SELECT project_number, amount_basis, total_approved_usd_m AS total,
+                       loan_usd_m, equity_usd_m, guarantee_usd_m, risk_mgmt_usd_m,
+                       coalesce(loan_usd_m, 0) + coalesce(equity_usd_m, 0)
+                         + coalesce(guarantee_usd_m, 0) + coalesce(risk_mgmt_usd_m, 0) AS parts
+                FROM projects_unique
+            ), long AS (
+                SELECT project_number, 'Loan' AS instrument, loan_usd_m AS amt FROM u WHERE loan_usd_m > 0
+                UNION ALL SELECT project_number, 'Equity', equity_usd_m FROM u WHERE equity_usd_m > 0
+                UNION ALL SELECT project_number, 'Guarantee', guarantee_usd_m FROM u WHERE guarantee_usd_m > 0
+                UNION ALL SELECT project_number, 'Risk management', risk_mgmt_usd_m FROM u WHERE risk_mgmt_usd_m > 0
+                UNION ALL SELECT project_number, 'Unallocated', total - parts FROM u WHERE total - parts > 0.5
+                UNION ALL SELECT project_number, 'Not specified', NULL FROM u
+                    WHERE parts = 0 AND coalesce(total, 0) = 0
+            )
+            SELECT l.project_number, l.instrument, l.amt AS approved_usd_m,
+                   CASE WHEN starts_with(u.amount_basis, 'Program-level') THEN NULL ELSE l.amt END
+                       AS approved_usd_m_for_sum
+            FROM long l JOIN u USING (project_number)
         """)
 
     print(f"整形済みデータを保存: {parquet_path.relative_to(ROOT)}、{db_path.relative_to(ROOT)}（projects）")

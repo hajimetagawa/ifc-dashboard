@@ -6,6 +6,8 @@ DuckDB のデータを、Power BI で読み込むための Parquet ファイル�
 
 出力（data/curated/powerbi/）:
     projects.parquet             … 案件（1案件1行）。金額の集計には approved_usd_m_for_sum を使う
+                                   事業部門（business_line）・部署（dept_name）・コミットの段階（commitment_stage）を含む
+    project_instruments.parquet  … 案件 × 投融資手段（融資・株式・保証・リスク管理商品）の承認額
     countries.parquet            … 国（1国1行、キー: iso3）。案件のない国も含む（has_ifc_projects で区別）
     industries.parquet           … 業種（1業種1行、キー: industry）
     documents.parquet            … レポート（1資料1行、キー: doc_id）
@@ -16,6 +18,7 @@ DuckDB のデータを、Power BI で読み込むための Parquet ファイル�
 
 Power BI でのリレーションシップ（すべて多対一。→ の先が「一」側）:
     projects[iso3]                      → countries[iso3]
+    project_instruments[project_number] → projects[project_number]
     projects[industry]                  → industries[industry]
     paragraphs[doc_id]                  → documents[doc_id]
     paragraph_countries[paragraph_id]   → paragraphs[paragraph_id]   （クロスフィルター: 双方向）
@@ -41,6 +44,7 @@ PID = "doc_id || '|' || page::VARCHAR || '|' || block_no::VARCHAR"
 QUERIES = {
     "projects": """
         SELECT project_number, project_name, company_name, country, iso3,
+               business_line, dept_name, dept_subunit, commitment_stage,
                wb_region, income_level, lending_type, ifc_region, ifc_region_basis,
                industry, coalesce(product_line, 'Not specified') AS product_line, department,
                status, status IN ('Active', 'Pending Disbursement') AS is_active,
@@ -66,6 +70,11 @@ QUERIES = {
         LEFT JOIN read_csv_auto('{ifc_regions}') r ON r.iso3 = w.id
         WHERE trim(w.region.value) <> 'Aggregates'
           AND w.id NOT IN (SELECT iso3 FROM countries WHERE iso3 IS NOT NULL)
+    """,
+    # 案件 × 投融資手段の承認額（金額の集計はこちらの approved_usd_m_for_sum を使うと手段別に分けられる）
+    "project_instruments": """
+        SELECT project_number, instrument, approved_usd_m, approved_usd_m_for_sum
+        FROM project_instruments
     """,
     "industries": """
         SELECT DISTINCT industry FROM projects_enriched WHERE industry IS NOT NULL

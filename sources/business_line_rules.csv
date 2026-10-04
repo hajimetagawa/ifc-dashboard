@@ -1,0 +1,6 @@
+priority,business_line,pattern,notes
+1,FIG,\bFIG\b|Financial Markets|Banking|Financial Inst|Trade & Supply,"金融機関（Financial Institutions Group）。旧組織の Global Industry, Financial Markets を含む"
+2,MAS,\bMAS\b|Manufact|Agribus,"製造・農業・サービス（Manufacturing, Agribusiness and Services）"
+3,INF,\bINF\b|\bINR\b|Infrastructure|Infra-,インフラ・天然資源
+4,Funds & Tech,Funds|Venture|TMT|Disruptive|Digital,ファンド・ベンチャー・通信技術
+5,Equity Portfolio,^Equity Portfolio Management,株式投資の管理部門（担当が移管された案件）

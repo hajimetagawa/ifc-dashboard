@@ -23,6 +23,17 @@ All tools and data sources are free. No paid AI or cloud services are used.
 
 ## Important notes on the data
 
+- **Committed vs pipeline.** `commitment_stage` groups project status: *Committed* = signed (Active, Completed,
+  Pending Disbursement); *Pipeline* = Pending Signing or Pending Approval; *On hold* = Hold.
+- **Business lines (who).** `business_line` (FIG, MAS, INF, Funds & Tech, Equity Portfolio, Other) is derived from
+  the department name with keyword rules in `sources/business_line_rules.csv`. Assumptions: the recorded department
+  is the unit responsible at some point after approval (not necessarily the originating unit), and business lines
+  stay stable across reorganisations. About 1.4% of projects are *Other*. `dept_name` is the department without
+  its unit code and sub-unit (`dept_subunit`).
+- **Instruments (how).** `project_instruments` splits each project's approved amount into loan, equity, guarantee
+  and risk-management amounts from the source data (a project can use several). The source `product_line` label
+  is not used for amounts, because it often disagrees with these figures.
+
 - **Amounts are Board-approved amounts** (US$ millions). They are not disbursements or outstanding balances.
   The dataset also includes pipeline projects pending approval or signing.
 - **Program-level amounts are excluded from totals.** For some programs, such as the Global Trade Finance
@@ -108,6 +119,7 @@ Files in `data/raw/pdf/` that are not in the register are reported when `extract
 | `pdf_manifest.csv` | Register of PDF reports: title, publisher, type, date, countries, language, layout |
 | `ifc_regions.csv` | IFC region by country, with status (Official / Confirmed (IFC department) / Provisional / Not assigned) and evidence |
 | `country_overrides.csv` | Manual mapping for country names that cannot be matched automatically, including regional projects |
+| `business_line_rules.csv` | Keyword rules mapping department names to business lines (first match wins, by `priority`) |
 | `amount_overrides.csv` | Manual override of the program-level amount classification (`Individual` or `Program-level`) |
 | `tag_dictionary.csv` | Regular expressions for industry tags (named as in the project data) and theme tags |
 | `country_aliases.csv` | Alternative country names used in report text (e.g. Turkey / Türkiye) |
@@ -121,6 +133,7 @@ Edit these files and re-run the relevant script to apply changes.
 |---|---|---|
 | `projects` | table | One row per disclosure document (same granularity as the API) |
 | `projects_unique` | view | One row per project; use this for aggregation |
+| `project_instruments` | table | Approved amount per project and instrument (loan, equity, guarantee, risk management) |
 | `countries` | table | World Bank region, income group, lending category and IFC region by country name |
 | `projects_enriched` | view | `projects_unique` joined with `countries` (used by the dashboard) |
 | `documents` | table | One row per PDF report, with page count and file hash |
@@ -134,8 +147,11 @@ Edit these files and re-run the relevant script to apply changes.
 
 ## Dashboard
 
-- **Overview** – headline figures, amounts or project counts by country and fiscal year,
-  product mix by country, and the number of IFC reports available per country.
+- **Overview** – a one-sentence answer to "who commits how much, through which instruments, where and in which
+  sectors", committed and pipeline totals, four breakdowns (who / how / where / what), a flow diagram from
+  business line or department through instrument to region or country and industry, and a fiscal-year trend.
+- **Drill down** – an icicle chart to click from the whole portfolio down to department, country, industry and
+  instrument, and step-by-step selectors that lead to the individual projects behind each figure.
 - **Country profile** – projects by fiscal year and product, the largest projects with links to IFC's
   disclosure pages, and paragraphs from IFC reports filtered by theme and by the selected industry,
   with report title and page number.
@@ -151,6 +167,7 @@ so the same data can be analysed in Power BI Desktop without connecting to DuckD
 | File | Grain | Key |
 |---|---|---|
 | `projects.parquet` | one row per project | `project_number` |
+| `project_instruments.parquet` | project × instrument | – |
 | `countries.parquet` | one row per country, including countries without IFC projects | `iso3` |
 | `industries.parquet` | one row per industry | `industry` |
 | `documents.parquet` | one row per report | `doc_id` |
@@ -162,6 +179,7 @@ so the same data can be analysed in Power BI Desktop without connecting to DuckD
 Relationships (many-to-one):
 
 - `projects[iso3]` → `countries[iso3]`; `projects[industry]` → `industries[industry]`
+- `project_instruments[project_number]` → `projects[project_number]`
 - `paragraphs[doc_id]` → `documents[doc_id]`
 - `paragraph_countries`, `paragraph_industries`, `paragraph_themes` → `paragraphs[paragraph_id]`
   (set cross-filter direction to *Both*)
