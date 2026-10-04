@@ -40,6 +40,26 @@ PRODUCT_COLORS = {
 PRODUCT_ORDER = list(PRODUCT_COLORS)
 BAR_COLOR = "#2a78d6"
 
+# 元データの国名の表示用の言い換え（略記の展開、複数国案件の明示）
+COUNTRY_DISPLAY = {
+    "Turkiye": "Türkiye",
+    "Middle East, Pakistan, and Afg Region": "Middle East, Pakistan and Afghanistan (multi-country)",
+    "Cen Afr, and Anglophne W Africa Region": "Central and Anglophone West Africa (multi-country)",
+    "Central Asia and Turkiye Region": "Central Asia and Türkiye (multi-country)",
+    "World Region": "Global (multi-country)",
+    "Country Name Pending": "Country not yet disclosed",
+    "Unknown": "Country not specified",
+}
+
+
+def display_country(name: str) -> str:
+    if name in COUNTRY_DISPLAY:
+        return COUNTRY_DISPLAY[name]
+    if name.endswith(" Subregion") or name.endswith(" Region"):
+        return name.rsplit(" ", 1)[0] + " (multi-country)"
+    return name
+
+
 st.set_page_config(page_title="IFC Portfolio Explorer", layout="wide")
 
 
@@ -48,6 +68,7 @@ st.set_page_config(page_title="IFC Portfolio Explorer", layout="wide")
 def load_projects(db: str) -> pd.DataFrame:
     with duckdb.connect(db, read_only=True) as con:
         df = con.sql("SELECT * FROM projects_enriched").df()
+    df["country"] = df["country"].fillna("Unknown").map(display_country)
     df["product_line"] = df["product_line"].fillna(UNKNOWN_PRODUCT)
     df["ifc_region"] = df["ifc_region"].fillna("Unassigned")
     df["industry"] = df["industry"].fillna("Not specified")
@@ -81,10 +102,24 @@ def fmt_usd(m: float) -> str:
 def style_fig(fig, height: int = 380):
     fig.update_layout(
         height=height, margin=dict(l=10, r=10, t=40, b=10),
-        legend=dict(orientation="h", yanchor="top", y=-0.12, x=0, title=None),
+        # 凡例はグラフの下、軸のタイトルと重ならない位置に置く
+        legend=dict(orientation="h", yanchor="top", y=-0.25, x=0, title=None),
         xaxis_title=None, yaxis_title=None, bargap=0.25,
     )
     fig.update_traces(marker_line_width=0)
+    return fig
+
+
+def amount_axis(fig, axis: str, is_amount: bool):
+    """金額の軸に単位と桁区切りを付ける。"""
+    update = fig.update_xaxes if axis == "x" else fig.update_yaxes
+    update(title_text="US$ millions" if is_amount else "Projects", tickformat=",")
+    return fig
+
+
+def fy_axis(fig):
+    """年度の軸を会計年度の表記にする。"""
+    fig.update_xaxes(tickprefix="FY", dtick=2, title_text="IFC fiscal year (July–June)")
     return fig
 
 
@@ -103,8 +138,10 @@ region = st.sidebar.selectbox("IFC region", [ALL] + regions,
 industries = sorted(projects["industry"].unique())
 industry = st.sidebar.selectbox("Industry", [ALL] + industries,
                                 index=(industries.index(DEFAULT_INDUSTRY) + 1) if DEFAULT_INDUSTRY in industries else 0)
-fy_min, fy_max = int(projects["approval_fy"].min()), int(projects["approval_fy"].max())
-fy = st.sidebar.slider("Board approval fiscal year", fy_min, fy_max, (max(fy_min, 2010), fy_max))
+fy_min, fy_max = int(projects["board_fy"].min()), int(projects["board_fy"].max())
+fy = st.sidebar.slider("Fiscal year", fy_min, fy_max, (max(fy_min, 2010), fy_max),
+                       help="Fiscal year of Board approval. For pipeline projects not yet approved, "
+                            "the fiscal year of the projected Board date is used.")
 status_label = st.sidebar.selectbox("Project status", list(STATUS_GROUPS), index=1)
 metric = st.sidebar.radio("Measure", ["Approved amount", "Number of projects"], horizontal=False)
 include_program = st.sidebar.checkbox(
@@ -112,7 +149,7 @@ include_program = st.sidebar.checkbox(
     help="Some programs (e.g. GTFP) record the program-wide approval ceiling against each participating "
          "institution. Summing these overstates commitments substantially, so they are excluded by default.")
 
-f = projects[projects["approval_fy"].between(*fy)]
+f = projects[projects["board_fy"].between(*fy)]
 if region != ALL:
     f = f[f["ifc_region"] == region]
 if industry != ALL:
@@ -153,14 +190,15 @@ with tab_overview:
         fig = px.bar(by_country, x=value_col, y="country", orientation="h",
                      title=f"Top 15 countries / regions by {metric_short}", color_discrete_sequence=[BAR_COLOR])
         fig.update_traces(hovertemplate="%{y}<br>" + value_label + ": %{x:,.0f}<extra></extra>")
-        c1.plotly_chart(style_fig(fig, 460), width="stretch", theme="streamlit")
+        fig = amount_axis(style_fig(fig, 460), "x", is_amount)
+        c1.plotly_chart(fig, width="stretch", theme="streamlit")
 
-        by_fy = f.groupby("approval_fy")[value_col].agg(agg).reset_index()
-        fig = px.bar(by_fy, x="approval_fy", y=value_col, title=f"{metric.capitalize()} by fiscal year",
+        by_fy = f.groupby("board_fy")[value_col].agg(agg).reset_index()
+        fig = px.bar(by_fy, x="board_fy", y=value_col, title=f"{metric.capitalize()} by fiscal year",
                      color_discrete_sequence=[BAR_COLOR])
         fig.update_traces(hovertemplate="FY%{x}<br>" + value_label + ": %{y:,.0f}<extra></extra>")
-        fig.update_xaxes(dtick=2)
-        c2.plotly_chart(style_fig(fig, 460), width="stretch", theme="streamlit")
+        fig = fy_axis(amount_axis(style_fig(fig, 460), "y", is_amount))
+        c2.plotly_chart(fig, width="stretch", theme="streamlit")
 
         top = by_country["country"].tolist()[::-1][:10]
         mix = f[f["country"].isin(top)].groupby(["country", "product_line"])[value_col].agg(agg).reset_index()
@@ -171,8 +209,10 @@ with tab_overview:
                      color_discrete_map=PRODUCT_COLORS, custom_data=[value_col])
         fig.update_traces(marker_line_width=1.5, marker_line_color="rgba(255,255,255,0.9)",
                           hovertemplate="%{y}<br>%{fullData.name}: %{x:.0f}% (%{customdata[0]:,.0f})<extra></extra>")
-        fig.update_xaxes(ticksuffix="%", range=[0, 100])
-        st.plotly_chart(style_fig(fig, 460), width="stretch", theme="streamlit")
+        fig = style_fig(fig, 460)
+        fig.update_xaxes(ticksuffix="%", range=[0, 101], tickvals=[0, 20, 40, 60, 80, 100],
+                         title_text=f"Share of {metric_short} (%)")
+        st.plotly_chart(fig, width="stretch", theme="streamlit")
 
         if ev:
             docs_by_iso = ev["doc_countries"].groupby("iso3")["doc_id"].nunique()
@@ -209,18 +249,19 @@ with tab_country:
 
         left, right = st.columns([1, 1])
         with left:
-            by_fy = cf.groupby(["approval_fy", "product_line"])[value_col].agg(agg).reset_index()
-            fig = px.bar(by_fy, x="approval_fy", y=value_col, color="product_line",
+            by_fy = cf.groupby(["board_fy", "product_line"])[value_col].agg(agg).reset_index()
+            fig = px.bar(by_fy, x="board_fy", y=value_col, color="product_line",
                          title=f"{metric.capitalize()} by fiscal year and product",
                          category_orders={"product_line": PRODUCT_ORDER}, color_discrete_map=PRODUCT_COLORS)
             fig.update_traces(marker_line_width=1.5, marker_line_color="rgba(255,255,255,0.9)",
                               hovertemplate="FY%{x}<br>%{fullData.name}: %{y:,.0f}<extra></extra>")
-            st.plotly_chart(style_fig(fig, 360), width="stretch", theme="streamlit")
+            fig = fy_axis(amount_axis(style_fig(fig, 360), "y", is_amount))
+            st.plotly_chart(fig, width="stretch", theme="streamlit")
 
             st.markdown("**Largest projects** (by approved amount)")
             show = (cf.sort_values("amount", ascending=False)
-                    [["project_name", "company_name", "approval_fy", "product_line", "amount", "status", "project_url"]]
-                    .rename(columns={"project_name": "Project", "company_name": "Client", "approval_fy": "FY",
+                    [["project_name", "company_name", "board_fy", "product_line", "amount", "status", "project_url"]]
+                    .rename(columns={"project_name": "Project", "company_name": "Client", "board_fy": "FY",
                                      "product_line": "Product", "amount": "Approved (US$m)", "status": "Status",
                                      "project_url": "Disclosure"}))
             st.dataframe(show.head(20), hide_index=True, width="stretch",
@@ -268,12 +309,12 @@ with tab_country:
 # ---------------------------------------------------------------- project list
 with tab_list:
     cols = {"project_number": "Project no.", "project_name": "Project", "company_name": "Client",
-            "country": "Country / region", "approval_fy": "FY", "industry": "Industry",
+            "country": "Country / region", "board_fy": "FY", "board_fy_basis": "FY basis", "industry": "Industry",
             "product_line": "Product", "status": "Status", "total_approved_usd_m": "Approved (US$m)",
             "amount_basis": "Amount basis", "environmental_category": "E&S category",
             "income_level": "Income group (current)", "ifc_region_basis": "Basis for IFC region",
             "project_url": "Disclosure"}
-    table = (f[list(cols)].sort_values(["approval_fy", "project_number"], ascending=[False, True])
+    table = (f[list(cols)].sort_values(["board_fy", "project_number"], ascending=[False, True])
              .rename(columns=cols))
     st.caption(f"{len(table):,} project(s)")
     st.dataframe(table, hide_index=True, width="stretch",
@@ -290,24 +331,30 @@ with tab_notes:
   outstanding balances or repayments.
 - The dataset also contains pipeline projects that are pending approval or signing; use the status filter
   to include or exclude them.
+- Fiscal years are IFC fiscal years (July–June). Projects not yet approved are placed in the fiscal year of
+  their projected Board date (shown as *Projected* in the *FY basis* column of the project list).
 
 **Program-level amounts**
 - For some programs, such as the Global Trade Finance Program (GTFP), the program-wide approval ceiling is
   recorded against each participating institution. Summing these records would overstate IFC's commitments
   substantially, so their amounts are excluded from totals by default (the records are still counted).
 - A record is treated as program-level if its project name starts with "GTFP", or if the same amount
-  (US$100m or more) was approved on the same date for four or more projects. The basis is shown in the
-  *Amount basis* column of the project list.
+  (US$100m or more) was approved on the same date for four or more projects. A few records have been
+  reviewed individually against IFC's disclosure pages and reclassified (marked "manual").
+  The basis is shown in the *Amount basis* column of the project list.
 
 **Regions and income groups**
-- IFC regions: countries in Middle East and Central Asia follow the country list on IFC's regional web page.
-  Other countries are assigned provisionally from the World Bank regional classification. The basis is
-  shown in the *Basis for IFC region* column.
+- IFC regions: countries in Middle East and Central Asia follow the country list on IFC's regional web page
+  ("Official"). A few countries are confirmed from the IFC regional department responsible for their projects
+  ("Confirmed (IFC department)"). Other countries are assigned provisionally from the World Bank regional
+  classification. The basis is shown in the *Basis for IFC region* column.
 - World Bank regions and income groups are the current classifications and are applied to all years.
 
 **Text from IFC reports**
 - Paragraphs from IFC reports are tagged with countries, industries and themes using keyword dictionaries.
   A tag indicates that a paragraph mentions a topic, not that the topic is its main subject.
+- Tables of contents, footnotes, bibliographies, table rows, repeated paragraphs and standard boilerplate
+  (e.g. "About IFC", copyright notices) are excluded from the text.
 
 **Sources**
 - IFC Investment Services Projects, World Bank Group Finances One (dataset DS00499)

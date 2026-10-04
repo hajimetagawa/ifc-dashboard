@@ -45,7 +45,7 @@ QUERIES = {
                industry, coalesce(product_line, 'Not specified') AS product_line, department,
                status, status IN ('Active', 'Pending Disbursement') AS is_active,
                environmental_category, document_type,
-               approval_fy, approval_cy, ifc_approval_date, ifc_signed_date, ifc_invested_date,
+               board_fy, board_fy_basis, approval_fy, approval_cy, ifc_approval_date, ifc_signed_date, ifc_invested_date,
                projected_board_date, date_disclosed,
                total_approved_usd_m, approved_usd_m_for_sum, amount_basis,
                starts_with(amount_basis, 'Program-level') AS is_program_level,

@@ -1,0 +1,5 @@
+# 改行コードをLFに統一する（Windowsとその他の環境で差分が出ないようにする）
+* text=auto eol=lf
+*.pdf binary
+*.parquet binary
+*.duckdb binary

@@ -19,10 +19,11 @@ UZB,Uzbekistan,Middle East and Central Asia,Official,https://www.ifc.org/en/wher
 TKM,Turkmenistan,Middle East and Central Asia,Official,https://www.ifc.org/en/where-we-work/middle-east,2026-09-29,
 PSE,West Bank and Gaza,Middle East and Central Asia,Official,https://www.ifc.org/en/where-we-work/middle-east,2026-09-29,
 YEM,Yemen,Middle East and Central Asia,Official,https://www.ifc.org/en/where-we-work/middle-east,2026-09-29,
-TJK,Tajikistan,Middle East and Central Asia,To be confirmed,https://www.ifc.org/en/where-we-work/middle-east,2026-09-29,地域ページ本文の国一覧に記載なし。同ページのニュース欄の国フィルタには記載あり
-DZA,Algeria,Africa,Provisional,,2026-09-29,MCTの一覧に記載なし。データ内の地域案件名 North Africa and Horn of Africa Region から推定
-DJI,Djibouti,Africa,Provisional,,2026-09-29,同上
-EGY,"Egypt, Arab Rep.",Africa,Provisional,,2026-09-29,同上
+TJK,Tajikistan,Middle East and Central Asia,Confirmed (IFC department),https://www.ifc.org/en/where-we-work/middle-east,2026-10-04,案件データの担当部署名で確認: MCTの部署（Regional Industry FIG MCT / FIG Central Asia & Turkey 等）が担当
+DZA,Algeria,Africa,Confirmed (IFC department),,2026-10-04,案件データの担当部署名で確認: アフリカの部署（FIG Africa / MAS Africa）が担当（最新はFY2011）
+DJI,Djibouti,Africa,Confirmed (IFC department),,2026-10-04,案件データの担当部署名で確認: アフリカの部署（FIG Africa）が担当（FY2005の1件のみ）
+EGY,"Egypt, Arab Rep.",Africa,Confirmed (IFC department),,2026-10-04,案件データの担当部署名で確認: アフリカの部署（FIG Africa / FIG North Africa 等）が担当
 LBY,Libya,Africa,Provisional,,2026-09-29,同上
-MAR,Morocco,Africa,Provisional,,2026-09-29,同上
-TUN,Tunisia,Africa,Provisional,,2026-09-29,同上
+MAR,Morocco,Africa,Confirmed (IFC department),,2026-10-04,案件データの担当部署名で確認: アフリカの部署（FIG Africa / MAS Africa）が担当
+TUN,Tunisia,Africa,Confirmed (IFC department),,2026-10-04,案件データの担当部署名で確認: アフリカの部署（MAS Africa / INF Africa）が担当
+ISR,Israel,Not assigned,Not assigned,,2026-10-04,案件2件はいずれも全世界担当の部署（Equity Portfolio Management等）。IFCの地域の担当部署なし

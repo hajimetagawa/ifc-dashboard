@@ -29,15 +29,23 @@ All tools and data sources are free. No paid AI or cloud services are used.
   Program (GTFP), the program-wide approval ceiling (e.g. US$7bn) is recorded against each participating bank.
   Summed naively, these records account for about 59% of all approved amounts in the dataset.
   A record is treated as program-level if its name starts with "GTFP", or if the same amount (US$100m or more)
-  was approved on the same date for four or more projects. The column `approved_usd_m_for_sum` holds the
-  amount used for totals, and `amount_basis` records the reason. Individual cases can be overridden in
-  `sources/amount_overrides.csv`.
+  was approved on the same date for four or more projects. Borderline cases were checked against IFC's
+  disclosure pages and overridden in `sources/amount_overrides.csv` (e.g. four unrelated US$100m loans
+  approved on the same day are kept as individual projects). The column `approved_usd_m_for_sum` holds the
+  amount used for totals, and `amount_basis` records the reason.
 - **Disclosure documents vs. projects.** The source data has one row per disclosure document; 17 projects have
   two documents. Use the `projects_unique` view (one row per project) for any aggregation.
-- **IFC regions.** Only Middle East and Central Asia follows the country list published on IFC's website.
-  Other countries are assigned provisionally from the World Bank region (`ifc_region_basis` shows which).
+- **Fiscal years.** IFC fiscal years run July–June. `board_fy` is the fiscal year of Board approval, or of the
+  projected Board date for pipeline projects not yet approved (`board_fy_basis` = Approved / Projected).
+  Use `board_fy` for time filters; otherwise all projects pending approval drop out.
+- **IFC regions.** Middle East and Central Asia follows the country list published on IFC's website ("Official").
+  Tajikistan and North African countries are confirmed from the IFC regional department that handles their
+  projects ("Confirmed (IFC department)"). Other countries are assigned provisionally from the World Bank region
+  (`ifc_region_basis` shows which).
 - **Current classifications.** World Bank regions and income groups are today's classifications, applied to all years.
 - **Keyword tagging** shows that a paragraph mentions a topic, not that the topic is its main subject.
+  Tables of contents, footnotes, bibliographies, table rows, repeated paragraphs and boilerplate are
+  excluded before tagging.
 
 ## Project structure
 
@@ -98,7 +106,7 @@ Files in `data/raw/pdf/` that are not in the register are reported when `extract
 | File | Purpose |
 |---|---|
 | `pdf_manifest.csv` | Register of PDF reports: title, publisher, type, date, countries, language, layout |
-| `ifc_regions.csv` | IFC region by country, with status (Official / Provisional / To be confirmed) and source |
+| `ifc_regions.csv` | IFC region by country, with status (Official / Confirmed (IFC department) / Provisional / Not assigned) and evidence |
 | `country_overrides.csv` | Manual mapping for country names that cannot be matched automatically, including regional projects |
 | `amount_overrides.csv` | Manual override of the program-level amount classification (`Individual` or `Program-level`) |
 | `tag_dictionary.csv` | Regular expressions for industry tags (named as in the project data) and theme tags |
@@ -116,7 +124,7 @@ Edit these files and re-run the relevant script to apply changes.
 | `countries` | table | World Bank region, income group, lending category and IFC region by country name |
 | `projects_enriched` | view | `projects_unique` joined with `countries` (used by the dashboard) |
 | `documents` | table | One row per PDF report, with page count and file hash |
-| `doc_blocks` | table | Text blocks with page, position, language and kind (paragraph, caption, short, boilerplate) |
+| `doc_blocks` | table | Text blocks with page, position, language and kind (paragraph, caption, short, boilerplate, toc, reference, note, table, duplicate) |
 | `doc_text` | view | English body paragraphs only |
 | `doc_countries` | table | Countries covered by each report |
 | `block_tags` | table | Country, industry and theme tags per paragraph |

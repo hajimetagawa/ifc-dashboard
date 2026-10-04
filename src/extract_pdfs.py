@@ -22,6 +22,13 @@
     caption     … 図表の見出し・出典・注記（Figure / Table / Source / Note などで始まるもの）
     boilerplate … 多くのページに繰り返し出てくる文字列（ヘッダー、フッター、ページ番号など）や、
                   複数の資料に同じ文章で出てくる定型文（About IFC など）
+    toc         … 目次（点線のリーダーを含む行、冒頭のページの「章題 ページ番号」の並び）
+    reference   … 巻末の参考文献（References / Bibliography の見出し以降）
+    note        … 脚注や出典の注記（URLを含むもの、脚注番号で始まるもの）
+    table       … 数字の比率が高いブロック（表の行など）
+    duplicate   … 同じ資料の中で、前に出てきた段落と同じ文章（要約と本章の重複など）
+
+本文としてタグ付け・表示の対象になるのは paragraph と caption だけ。
 """
 
 from __future__ import annotations
@@ -29,7 +36,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import re
-from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -44,6 +50,7 @@ BOILERPLATE_PHRASES = ROOT / "sources" / "boilerplate_phrases.csv"
 DB_PATH = ROOT / "data" / "curated" / "ifc.duckdb"
 
 PARAGRAPH_MIN_WORDS = 12
+TABLE_DIGIT_RATIO = 0.3   # 文字のうち数字の比率がこれ以上のブロックは表の行とみなす
 CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 LATIN = re.compile(r"[A-Za-z]")
 
@@ -112,15 +119,39 @@ def extract_document(path: Path, doc_id: str) -> tuple[int, pd.DataFrame]:
     # ページ番号だけのブロック
     is_boiler |= df["text"].str.fullmatch(r"[\divxlcIVXLC\s\-–|/.]+")
 
-    # 単語の大半が数字のブロック（図表の数値など）は段落として扱わない
-    alpha_ratio = df["text"].str.split().apply(
-        lambda ws: sum(any(ch.isalpha() for ch in w) for w in ws) / max(len(ws), 1))
-
     df["kind"] = "short"
-    df.loc[(df["n_words"] >= PARAGRAPH_MIN_WORDS) & (alpha_ratio >= 0.5), "kind"] = "paragraph"
+    df.loc[df["n_words"] >= PARAGRAPH_MIN_WORDS, "kind"] = "paragraph"
+    para = df["kind"] == "paragraph"
+
+    # 数字の比率が高いブロック（表の行など）
+    digits = df["text"].str.count(r"\d")
+    letters = df["text"].str.count(r"[^\W\d_]")
+    df.loc[para & (digits / (digits + letters).clip(lower=1) >= TABLE_DIGIT_RATIO), "kind"] = "table"
+
+    # 目次: 点線のリーダーを含む行、または冒頭のページで「章題 ページ番号 章題」の並びが3回以上ある段落
+    toc_pages = max(5, n_pages * 0.1)
+    toc_like = df["text"].str.count(r"[a-z\)] \d{1,3} (?=[A-Z0-9])") >= 3
+    df.loc[para & (df["text"].str.contains(r"\.{5,}") | (toc_like & (df["page"] <= toc_pages))), "kind"] = "toc"
+
+    # 脚注・出典の注記: URLを含む、または脚注番号（1〜3桁の数字＋空白＋大文字）で始まる
+    is_note = df["text"].str.contains(r"https?://|www\.") | df["text"].str.match(r"^\d{1,3}\s+[A-Z][a-z]")
+    df.loc[(df["kind"] == "paragraph") & is_note, "kind"] = "note"
+
+    # 巻末の参考文献: 後半30%のページにある最後の References / Bibliography の見出し以降
+    heading = df["text"].str.fullmatch(r"(?i)(references|bibliography|works cited)")
+    heading &= df["page"] >= n_pages * 0.7
+    if heading.any():
+        start = heading[heading].index[-1]
+        df.loc[(df.index > start) & df["kind"].isin(["paragraph", "short"]), "kind"] = "reference"
+
     # 図表の見出し・出典・注記（本文とは分けて扱う）
     is_caption = df["text"].str.match(r"(?i)^(figure|fig\.|table|box|chart|source|sources|note|notes)\b")
-    df.loc[is_caption, "kind"] = "caption"
+    df.loc[is_caption & df["kind"].isin(["paragraph", "short"]), "kind"] = "caption"
+
+    # 同じ資料の中で重複する段落（2回目以降）
+    norm = df["text"].str.lower().str.replace(r"\W+", " ", regex=True).str.strip()
+    df.loc[(df["kind"] == "paragraph") & norm.duplicated(), "kind"] = "duplicate"
+
     df.loc[is_boiler, "kind"] = "boilerplate"
     return n_pages, df
 
@@ -210,9 +241,11 @@ def main() -> None:
 
             c = blocks["kind"].value_counts() if not blocks.empty else {}
             en_par = int(((blocks["kind"] == "paragraph") & (blocks["lang"] == "en")).sum()) if not blocks.empty else 0
+            excluded = sum(c.get(k, 0) for k in ("toc", "reference", "note", "table", "duplicate"))
             print(f"OK    {m['doc_id']}  {n_pages}ページ / ブロック {len(blocks):,}"
                   f"（段落 {c.get('paragraph', 0):,}・図表見出し {c.get('caption', 0):,}"
-                  f"・短文 {c.get('short', 0):,}・ヘッダー等 {c.get('boilerplate', 0):,}）"
+                  f"・短文 {c.get('short', 0):,}・ヘッダー等 {c.get('boilerplate', 0):,}"
+                  f"・目次/注記/参考文献/表/重複 {excluded:,}）"
                   f" / 本文として使う英語の段落 {en_par:,}")
             if en_par == 0:
                 print("      ※英語の段落が抽出できていません。スキャンPDFなどの可能性があります")

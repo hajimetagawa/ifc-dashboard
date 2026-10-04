@@ -18,7 +18,7 @@ theme,Capital markets,"\bcapital markets?\b|\bbond markets?\b|\bstock exchange\b
 theme,Regulation and supervision,"\bregulat(ion|ory|or|ors)\b|\bsupervis(ion|ory)\b|\bcentral bank\b|\bprudential\b|\bBasel\b",
 theme,Trade finance,"\btrade financ",
 theme,Gender,"\bwomen\b|\bfemale\b|\bgender\b",
-theme,Climate,"\bclimate\b|\bgreen (financ|bond|invest|growth)|\bemissions?\b|\bdecarboni[sz]|\brenewable|\badaptation\b",
+theme,Climate,"(?<!investment )(?<!business )\bclimate\b|\bgreen (financ|bond|invest|growth)|\bemissions?\b|\bdecarboni[sz]|\brenewable|\badaptation\b",
 theme,State-owned enterprises,"\bstate-owned\b|\bSOEs?\b|\bstate enterprises?\b|\bprivati[sz]",
 theme,Informality,"\binformal (sector|economy|lend|employment|firms?)|\binformality\b",
 theme,Macro and FX risk,"\bexchange rates?\b|\bcurrency (risk|depreciation|devaluation)|\bdollari[sz]|\binflation\b|\bdevaluation\b",

@@ -1,0 +1,8 @@
+# Streamlit の設定（閲覧者向けの表示）
+[client]
+# 開発者向けのメニュー（Deploy ボタンなど）を表示しない
+toolbarMode = "minimal"
+
+[browser]
+# 利用状況の統計を Streamlit に送信しない
+gatherUsageStats = false

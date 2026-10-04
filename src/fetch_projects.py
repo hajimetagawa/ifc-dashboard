@@ -13,6 +13,7 @@ IFC Investment Services Projects（Finances One DS00499）を取得し、整形�
         projects_unique : 案件単位（1案件1行。金額の集計はこちらを使う）
     金額の集計には approved_usd_m_for_sum を使う（プログラム全体の枠と判定した金額を除いたもの。
     判定の根拠は amount_basis 列）
+    年度の絞り込みには board_fy を使う（承認前の案件は理事会の予定日の年度。根拠は board_fy_basis 列）
 
 API仕様: https://financesone.worldbank.org/api-explorer?id=DS00499
     認証不要 / 1回あたり最大1,000件（top と skip でページ分割）
@@ -133,6 +134,15 @@ def tidy(records: list[dict]) -> pd.DataFrame:
             df["approval_fy"] = computed
     if "approval_cy" in df.columns:
         df["approval_cy"] = pd.to_numeric(df["approval_cy"], errors="coerce").astype("Int64")
+
+    # 分析用の年度: 承認済みは承認年度、承認前（承認日がない案件）は理事会の予定日の年度
+    if "approval_fy" in df.columns and "projected_board_date" in df.columns:
+        p = df["projected_board_date"]
+        projected_fy = (p.dt.year + (p.dt.month >= 7).astype("Int64")).astype("Int64")
+        df["board_fy"] = df["approval_fy"].fillna(projected_fy)
+        df["board_fy_basis"] = pd.Series(pd.NA, index=df.index, dtype="string")
+        df.loc[df["approval_fy"].notna(), "board_fy_basis"] = "Approved"
+        df.loc[df["approval_fy"].isna() & projected_fy.notna(), "board_fy_basis"] = "Projected"
     return flag_program_amounts(df)
 
 
@@ -156,8 +166,17 @@ def flag_program_amounts(df: pd.DataFrame) -> pd.DataFrame:
     # 手作業での上書き（sources/amount_overrides.csv。amount_basis に Individual または Program-level を記入）
     if AMOUNT_OVERRIDES.exists():
         ov = pd.read_csv(AMOUNT_OVERRIDES, dtype=str).dropna(subset=["project_number"])
+        known = set(df["project_number"].dropna())
         for r in ov.itertuples():
-            df.loc[df["project_number"] == r.project_number.strip(), "amount_basis"] = f"{r.amount_basis.strip()} (manual)"
+            pn, basis = r.project_number.strip(), str(r.amount_basis).strip()
+            if basis not in ("Individual", "Program-level"):
+                print(f"※amount_overrides.csv: 案件 {pn} の amount_basis「{basis}」は無効です"
+                      "（Individual または Program-level）。この行は無視します")
+                continue
+            if pn not in known:
+                print(f"※amount_overrides.csv: 案件番号 {pn} がデータにありません。この行は無視します")
+                continue
+            df.loc[df["project_number"] == pn, "amount_basis"] = f"{basis} (manual)"
 
     is_program = df["amount_basis"].str.startswith("Program-level")
     df["approved_usd_m_for_sum"] = df["total_approved_usd_m"].mask(is_program)
@@ -171,6 +190,11 @@ def summarize(df: pd.DataFrame) -> None:
         print(f"案件番号の重複: {dup:,} 件")
     if "approval_fy" in df.columns and df["approval_fy"].notna().any():
         print(f"承認年度の範囲: FY{df['approval_fy'].min()} 〜 FY{df['approval_fy'].max()}")
+    if "board_fy_basis" in df.columns:
+        u = df.drop_duplicates("project_number")
+        print(f"年度の根拠: 承認年度 {(u['board_fy_basis'] == 'Approved').sum():,} 件"
+              f" / 理事会の予定日 {(u['board_fy_basis'] == 'Projected').sum():,} 件"
+              f" / 年度なし {u['board_fy_basis'].isna().sum():,} 件")
     print("\n列ごとの欠損率:")
     for col, rate in df.isna().mean().sort_values(ascending=False).items():
         print(f"  {col:<28} {rate:6.1%}")

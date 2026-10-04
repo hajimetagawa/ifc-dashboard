@@ -118,7 +118,7 @@ def build(wb: pd.DataFrame, con: duckdb.DuckDBPyConnection) -> pd.DataFrame:
         wb_region = o["wb_region"] if o is not None and pd.notna(o["wb_region"]) else (w["wb_region"] if w is not None else None)
 
         if o is not None and pd.notna(o["ifc_region"]):
-            ifc_region, basis = o["ifc_region"], "Regional project (from project country name)"
+            ifc_region, basis = o["ifc_region"], "Multi-country project (from country field)"
         elif iso3 is not None and iso3 in ifc.index:
             ifc_region, basis = ifc.loc[iso3, "ifc_region"], ifc.loc[iso3, "status"]
         elif wb_region in WB_TO_IFC_PROVISIONAL:
