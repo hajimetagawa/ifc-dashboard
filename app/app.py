@@ -12,7 +12,8 @@ IFC Portfolio Explorer (Streamlit)
     How   … どの投融資手段（融資・株式・保証・リスク管理商品）で
     Where … どの地域・国に
     What  … どの業種に
-    How much … いくらコミットしたか（Committed）、コミットする予定か（Pipeline）
+    How much … 現在いくら抱えているか（Active portfolio）、これまでの実績（Completed）、
+               今後コミットする予定か（Pipeline）
 """
 
 from __future__ import annotations
@@ -26,18 +27,21 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
+import watchlist  # watchlist: 試行的な注視リスト。削除するときはこの行と、render を呼ぶ行を消す
+
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = Path(os.environ.get("IFC_DB", ROOT / "data" / "curated" / "ifc.duckdb"))
 
 ALL = "All"
 DEFAULT_BUSINESS_LINE = "FIG"
 DEFAULT_REGION = "Middle East and Central Asia"
-STAGES = ["Committed", "Pipeline", "On hold"]
-DEFAULT_STAGES = ["Committed", "Pipeline"]
+STAGES = ["Active portfolio", "Completed", "Pipeline", "On hold"]
+DEFAULT_STAGES = ["Active portfolio", "Pipeline"]
 ACTIVE = ["Active", "Pending Disbursement"]
 
 # 色はエンティティに固定する（絞り込みで色が変わらないように）
-STAGE_COLORS = {"Committed": "#2a78d6", "Pipeline": "#86b6ef", "On hold": "#a8a7a2"}
+# 実行中を最も濃く、完了済みは控えめに、パイプラインは薄い青
+STAGE_COLORS = {"Active portfolio": "#2a78d6", "Completed": "#9c9b96", "Pipeline": "#86b6ef", "On hold": "#d3d2cc"}
 INSTRUMENT_ORDER = ["Loan", "Equity", "Guarantee", "Risk management", "Unallocated", "Not specified"]
 INSTRUMENT_COLORS = {"Loan": "#eb6834", "Equity": "#1baf7a", "Guarantee": "#eda100",
                      "Risk management": "#e87ba4", "Unallocated": "#a8a7a2", "Not specified": "#c3c2b7"}
@@ -73,9 +77,10 @@ COUNTRY_DISPLAY = {
 }
 
 DEFINITIONS = (
-    "**Committed** = signed projects (active, completed or awaiting disbursement). "
-    "**Pipeline** = approved by the Board but not yet signed, or awaiting Board approval. "
-    "Amounts are IFC's own investment as approved by the Board, in US$ millions."
+    "**Active portfolio** = signed and ongoing (active, or signed and awaiting disbursement) — the current exposure. "
+    "**Completed** = the track record. "
+    "**Pipeline** = approved by the Board but not yet signed, or awaiting approval — not yet a legal commitment. "
+    "Amounts are IFC's own investment as approved by the Board, in US\\$ millions."
 )
 
 
@@ -102,7 +107,7 @@ def load_data(db: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     projects["dept_name"] = projects["dept_name"].fillna("Not specified")
     projects["business_line"] = projects["business_line"].fillna("Other")
     attrs = ["project_number", "project_name", "company_name", "country", "iso3", "ifc_region", "industry",
-             "business_line", "dept_name", "commitment_stage", "status", "board_fy", "amount_basis"]
+             "business_line", "dept_name", "portfolio_stage", "status", "board_fy", "amount_basis"]
     facts = instruments.merge(projects[attrs], on="project_number", how="left")
     return projects, facts
 
@@ -163,7 +168,8 @@ fy = st.sidebar.slider("When — fiscal year", fy_min, fy_max, (max(fy_min, 2015
                        help="IFC fiscal years run July–June. Pipeline projects not yet approved are placed in "
                             "the fiscal year of their projected Board date.")
 stages = st.sidebar.multiselect("Stage", STAGES, default=DEFAULT_STAGES,
-                                help="Committed: signed (active, completed or awaiting disbursement). "
+                                help="Active portfolio: signed and ongoing (active, or awaiting disbursement). "
+                                     "Completed: finished projects (track record). "
                                      "Pipeline: approved but not yet signed, or awaiting Board approval. "
                                      "On hold: put on hold by IFC.")
 
@@ -193,24 +199,32 @@ include_program = st.sidebar.checkbox(
          "institution. Summing these overstates commitments substantially, so they are excluded by default.")
 
 # ---------------------------------------------------------------- apply filters
-p = projects[projects["board_fy"].between(*fy) & projects["commitment_stage"].isin(stages)]
-if business_line != ALL:
-    p = p[p["business_line"] == business_line]
-if department != ALL:
-    p = p[p["dept_name"] == department]
-if region != ALL:
-    p = p[p["ifc_region"] == region]
-if country_choice != ALL:
-    p = p[p["country"] == country_choice]
-if industry != ALL:
-    p = p[p["industry"] == industry]
-facts = facts_all[facts_all["project_number"].isin(p["project_number"])]
-if instrument != ALL:
-    facts = facts[facts["instrument"] == instrument]
-    p = p[p["project_number"].isin(facts["project_number"])]
-facts = facts.assign(amount=facts["approved_usd_m"] if include_program else facts["approved_usd_m_for_sum"])
-p = p.merge(facts.groupby("project_number")["amount"].sum(min_count=1).rename("amount"),
-            on="project_number", how="left")
+def apply_filters(fy_range: tuple[int, int] | None, stage_list: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """画面左の絞り込みを適用する。fy_range=None なら年度で絞らない（実行中の案件を全件見るとき）。"""
+    q = projects[projects["portfolio_stage"].isin(stage_list)]
+    if fy_range is not None:
+        q = q[q["board_fy"].between(*fy_range)]
+    if business_line != ALL:
+        q = q[q["business_line"] == business_line]
+    if department != ALL:
+        q = q[q["dept_name"] == department]
+    if region != ALL:
+        q = q[q["ifc_region"] == region]
+    if country_choice != ALL:
+        q = q[q["country"] == country_choice]
+    if industry != ALL:
+        q = q[q["industry"] == industry]
+    fx = facts_all[facts_all["project_number"].isin(q["project_number"])]
+    if instrument != ALL:
+        fx = fx[fx["instrument"] == instrument]
+        q = q[q["project_number"].isin(fx["project_number"])]
+    fx = fx.assign(amount=fx["approved_usd_m"] if include_program else fx["approved_usd_m_for_sum"])
+    q = q.merge(fx.groupby("project_number")["amount"].sum(min_count=1).rename("amount"),
+                on="project_number", how="left")
+    return q, fx
+
+
+p, facts = apply_filters(fy, stages)
 
 is_amount = metric == "Amount"
 value_label = "US$ millions" if is_amount else "Projects"
@@ -243,7 +257,7 @@ def n_projects(n: int, word: str = "project") -> str:
 def stage_totals(df: pd.DataFrame) -> dict[str, tuple[float, int]]:
     out = {}
     for s in STAGES:
-        d = df[df["commitment_stage"] == s]
+        d = df[df["portfolio_stage"] == s]
         out[s] = (d["amount"].sum(), d["project_number"].nunique())
     return out
 
@@ -251,20 +265,20 @@ def stage_totals(df: pd.DataFrame) -> dict[str, tuple[float, int]]:
 def breakdown(df: pd.DataFrame, col: str, top: int = 10) -> pd.DataFrame:
     """区分 × 段階の集計。上位 top 件以外は "Other" にまとめる。"""
     if df.empty:
-        return pd.DataFrame(columns=[col, "commitment_stage", "value"])
+        return pd.DataFrame(columns=[col, "portfolio_stage", "value"])
     if is_amount:
-        g = df.groupby([col, "commitment_stage"])["amount"].sum()
+        g = df.groupby([col, "portfolio_stage"])["amount"].sum()
     else:
-        g = df.groupby([col, "commitment_stage"])["project_number"].nunique()
+        g = df.groupby([col, "portfolio_stage"])["project_number"].nunique()
     g = g.rename("value").reset_index()
     order = g.groupby(col)["value"].sum().sort_values(ascending=False)
     keep = list(order.index[:top])
     if len(order) > top:
         rest = df[~df[col].isin(keep)]
         if is_amount:
-            o = rest.groupby("commitment_stage")["amount"].sum()
+            o = rest.groupby("portfolio_stage")["amount"].sum()
         else:
-            o = rest.groupby("commitment_stage")["project_number"].nunique()
+            o = rest.groupby("portfolio_stage")["project_number"].nunique()
         other = o.rename("value").reset_index().assign(**{col: f"Other ({len(order) - top})"})
         g = pd.concat([g[g[col].isin(keep)], other], ignore_index=True)
     return g
@@ -275,8 +289,8 @@ def stacked_bar(g: pd.DataFrame, col: str, title: str):
     # "Other (n)" は金額に関係なく最下段に置く
     order = [c for c in totals.index if not str(c).startswith("Other (")] + \
             [c for c in totals.index if str(c).startswith("Other (")]
-    fig = px.bar(g, x="value", y=col, color="commitment_stage", orientation="h", title=title,
-                 category_orders={col: order, "commitment_stage": STAGES},
+    fig = px.bar(g, x="value", y=col, color="portfolio_stage", orientation="h", title=title,
+                 category_orders={col: order, "portfolio_stage": STAGES},
                  color_discrete_map=STAGE_COLORS)
     fig.update_traces(hovertemplate="%{y}<br>%{fullData.name}: %{x:,.0f}<extra></extra>")
     # 棒の太さを区分の数によらず一定にする（区分が少ないときに棒が極端に太くならないように）
@@ -291,10 +305,94 @@ st.title("IFC Portfolio Explorer")
 st.markdown("Who at IFC commits how much, **through which instruments**, **where** and **in which sectors** — "
             "and what is still in the pipeline.")
 
-tab_overview, tab_drill, tab_country, tab_list, tab_notes = st.tabs(
-    ["Overview", "Drill down", "Country profile", "Project list", "Notes on the data"])
+tab_active, tab_overview, tab_drill, tab_country, tab_list, tab_notes = st.tabs(
+    ["Active portfolio", "Overview", "Drill down", "Country profile", "Project list", "Notes on the data"])
 
 empty = p.empty
+
+# ---------------------------------------------------------------- active portfolio
+today = pd.Timestamp.today()
+CURRENT_FY = today.year + (1 if today.month >= 7 else 0)   # IFCの会計年度は7月始まり
+
+with tab_active:
+    # 実行中の案件は、承認年度・段階の絞り込みによらず全件を対象にする
+    pa, fa = apply_filters(None, ["Active portfolio"])
+    if pa.empty:
+        st.info("No active projects match the current filters.")
+    else:
+        pa = pa.assign(client=pa["company_name"].fillna("(client not specified)"))
+        total = pa["amount"].sum()
+        undisb = pa[pa["status"] == "Pending Disbursement"]
+        st.markdown(f"{scope_text()} has **{md_usd(total)}** in its active portfolio today: "
+                    f"**{n_projects(len(pa))}** with **{pa['client'].nunique():,} clients** in "
+                    f"**{pa['country'].nunique():,} countries or regions**. "
+                    f"**{md_usd(undisb['amount'].sum())}** of it is signed but not yet disbursed.")
+        st.caption("All projects that are signed and still ongoing, whatever their approval year — the fiscal-year "
+                   "and stage filters do not apply on this tab. Amounts are Board-approved commitments, not "
+                   "outstanding balances: the source data has no disbursement, repayment or credit-quality figures.")
+        k1, k2, k3, k4 = st.columns(4)
+        k1.metric("Active portfolio", fmt_usd(total))
+        k2.metric("Projects", f"{len(pa):,}")
+        k3.metric("Clients", f"{pa['client'].nunique():,}")
+        k4.metric("Awaiting disbursement", fmt_usd(undisb["amount"].sum()),
+                  help=f"{n_projects(len(undisb))} signed but not yet disbursed")
+
+        # 集中: 相手先と国
+        st.subheader("Concentration")
+        c1, c2 = st.columns(2)
+        for col_ui, key, label in ((c1, "client", "client"), (c2, "country", "country or region")):
+            g = pa.groupby(key)["amount"].sum().sort_values(ascending=False)
+            top = g.head(10)
+            share = top.sum() / total if total else 0
+            df_top = top.reset_index().rename(columns={"amount": "value"})
+            df_top["share"] = df_top["value"] / total * 100 if total else 0
+            fig = px.bar(df_top, x="value", y=key, orientation="h", custom_data=["share"],
+                         title=f"Top {len(top)} by {label} — {share:.0%} of the active portfolio",
+                         category_orders={key: list(top.index)},
+                         color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
+            fig.update_traces(hovertemplate="%{y}<br>US$%{x:,.0f}m · %{customdata[0]:.1f}% of active<extra></extra>")
+            fig = style_fig(fig, 30 * len(top) + 130)
+            fig.update_xaxes(title_text="US$ millions", tickformat=",")
+            col_ui.plotly_chart(fig, width="stretch", theme="streamlit")
+
+        # リスクの性質
+        st.subheader("Risk profile")
+        eq_amt = fa[fa["instrument"] == "Equity"]["amount"].sum()
+        env = pa["environmental_category"].fillna("")
+        high_es = pa[env.str.startswith("A") | env.str.startswith("FI-1")]
+        poor = pa[pa["lending_type"].eq("IDA").fillna(False) | pa["income_level"].eq("Low income").fillna(False)]
+        old_ = pa[(CURRENT_FY - pa["board_fy"]) >= 10]
+        prof = pd.DataFrame([
+            ("Equity (no contractual repayment)", eq_amt, fa[fa["instrument"] == "Equity"]["project_number"].nunique()),
+            ("High E&S category (A or FI-1)", high_es["amount"].sum(), len(high_es)),
+            ("IDA or low-income countries", poor["amount"].sum(), len(poor)),
+            ("Approved 10+ fiscal years ago", old_["amount"].sum(), len(old_)),
+            ("Signed, awaiting disbursement", undisb["amount"].sum(), len(undisb)),
+        ], columns=["Characteristic", "Amount", "Projects"])
+        prof["Share"] = prof["Amount"] / total * 100 if total else 0
+        left, right = st.columns([3, 2])
+        fig = px.bar(prof, x="Share", y="Characteristic", orientation="h", custom_data=["Amount", "Projects"],
+                     title="Share of the active portfolio with each characteristic",
+                     category_orders={"Characteristic": list(prof["Characteristic"])},
+                     color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
+        fig.update_traces(hovertemplate="%{y}<br>%{x:.1f}% · US$%{customdata[0]:,.0f}m · "
+                                        "%{customdata[1]} project(s)<extra></extra>")
+        fig = style_fig(fig, 300)
+        fig.update_xaxes(title_text="% of active portfolio amount", ticksuffix="%", range=[0, 100])
+        left.plotly_chart(fig, width="stretch", theme="streamlit")
+
+        # 経過年数
+        age = (CURRENT_FY - pa["board_fy"]).clip(lower=0)
+        buckets = pd.cut(age, bins=[-1, 2, 5, 9, 200], labels=["0–2 years", "3–5 years", "6–9 years", "10+ years"])
+        ga = pa.assign(age=buckets).groupby("age", observed=False)["amount"].sum().reset_index()
+        fig = px.bar(ga, x="age", y="amount", title=f"Years since approval (FY{CURRENT_FY})",
+                     color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
+        fig.update_traces(hovertemplate="%{x}<br>US$%{y:,.0f}m<extra></extra>")
+        fig = style_fig(fig, 300)
+        fig.update_yaxes(title_text="US$ millions", tickformat=",")
+        right.plotly_chart(fig, width="stretch", theme="streamlit")
+
+        watchlist.render(pa, fa, CURRENT_FY, fmt_usd)  # watchlist: 削除するときはこの行を消す
 
 # ---------------------------------------------------------------- overview
 with tab_overview:
@@ -303,24 +401,26 @@ with tab_overview:
     else:
         t = stage_totals(facts)
         n_proj = p["project_number"].nunique()
-        n_unpriced = int((p["commitment_stage"].eq("Pipeline") & p["amount"].isna()).sum())
-        parts = []
-        if "Committed" in stages:
-            parts.append(f"committed **{md_usd(t['Committed'][0])}** through **{n_projects(t['Committed'][1])}**")
-        if "Pipeline" in stages:
-            parts.append(f"has **{md_usd(t['Pipeline'][0])}** in **{n_projects(t['Pipeline'][1], 'pipeline project')}**")
-        if "On hold" in stages:
-            parts.append(f"has **{md_usd(t['On hold'][0])}** in **{n_projects(t['On hold'][1])} on hold**")
-        st.markdown(f"From FY{fy[0]} to FY{fy[1]}, {scope_text()} " + ", and ".join(parts) + ".")
+        n_unpriced = int((p["portfolio_stage"].eq("Pipeline") & p["amount"].isna()).sum())
+        phrases = {
+            "Active portfolio": "has **{amt}** in its active portfolio (**{n}**)",
+            "Completed": "has completed **{amt}** (**{n}**)",
+            "Pipeline": "has **{amt}** in the pipeline (**{n}**)",
+            "On hold": "has **{amt}** on hold (**{n}**)",
+        }
+        parts = [phrases[sg].format(amt=md_usd(t[sg][0]), n=n_projects(t[sg][1]))
+                 for sg in STAGES if sg in stages]
+        st.markdown(f"Approved in FY{fy[0]}–FY{fy[1]}: {scope_text()} " + ", ".join(parts) + ".")
         st.caption(DEFINITIONS)
 
         k1, k2, k3, k4 = st.columns(4)
-        k1.metric("Committed", fmt_usd(t["Committed"][0]) if "Committed" in stages else "not selected",
-                  help="Signed: active, completed or awaiting disbursement")
+        k1.metric("Active portfolio", fmt_usd(t["Active portfolio"][0]) if "Active portfolio" in stages
+                  else "not selected", help="Signed and ongoing: active, or signed and awaiting disbursement")
         k2.metric("Pipeline", fmt_usd(t["Pipeline"][0]) if "Pipeline" in stages else "not selected",
                   help="Approved but not yet signed, or awaiting Board approval")
-        k3.metric("Projects", f"{n_proj:,}")
-        k4.metric("Countries / regions", f"{p['country'].nunique():,}")
+        k3.metric("Completed", fmt_usd(t["Completed"][0]) if "Completed" in stages else "not selected",
+                  help="Finished projects: the track record. Add it with the Stage filter.")
+        k4.metric("Projects", f"{n_proj:,}")
         notes = []
         n_program = int(p["amount_basis"].str.startswith("Program-level").sum())
         if n_program and not include_program:
@@ -331,8 +431,8 @@ with tab_overview:
             st.caption(" ".join(notes) + " See *Notes on the data*.")
 
         st.subheader("Who, how, where and what")
-        st.caption("Dark bars are committed, light bars are pipeline. Choose one business line or region on the "
-                   "left to see departments or countries.")
+        st.caption("Dark blue: active portfolio · grey: completed · light blue: pipeline. Choose one business line "
+                   "or region on the left to see departments or countries.")
         c1, c2 = st.columns(2)
         c1.plotly_chart(stacked_bar(breakdown(facts, who_col), who_col, f"Who commits — by {who_label}"),
                         width="stretch", theme="streamlit")
@@ -385,12 +485,12 @@ with tab_overview:
 
         st.subheader("When")
         if is_amount:
-            by_fy = facts.groupby(["board_fy", "commitment_stage"])["amount"].sum().rename("value").reset_index()
+            by_fy = facts.groupby(["board_fy", "portfolio_stage"])["amount"].sum().rename("value").reset_index()
         else:
-            by_fy = facts.groupby(["board_fy", "commitment_stage"])["project_number"].nunique().rename("value").reset_index()
-        fig = px.bar(by_fy, x="board_fy", y="value", color="commitment_stage",
+            by_fy = facts.groupby(["board_fy", "portfolio_stage"])["project_number"].nunique().rename("value").reset_index()
+        fig = px.bar(by_fy, x="board_fy", y="value", color="portfolio_stage",
                      title=f"{'Amount' if is_amount else 'Projects'} by fiscal year",
-                     category_orders={"commitment_stage": STAGES}, color_discrete_map=STAGE_COLORS)
+                     category_orders={"portfolio_stage": STAGES}, color_discrete_map=STAGE_COLORS)
         fig.update_traces(hovertemplate="FY%{x}<br>%{fullData.name}: %{y:,.0f}<extra></extra>")
         fig = style_fig(fig, 380)
         fig.update_xaxes(tickprefix="FY", dtick=1 if fy[1] - fy[0] <= 12 else 2, title_text="IFC fiscal year (July–June)")
@@ -451,8 +551,8 @@ with tab_drill:
             fig.update_layout(height=560, margin=dict(l=4, r=4, t=8, b=4))
             st.plotly_chart(fig, width="stretch", theme="streamlit")
             st.caption("Levels from left to right: " + " → ".join(path) + ". Box height shows the share of the "
-                       "level to its left. Amounts in US$ millions; committed and pipeline amounts are combined here "
-                       "— use the Stage filter to separate them.")
+                       "level to its left. Amounts in US$ millions for all selected stages combined "
+                       "— use the Stage filter to look at one stage.")
 
         st.subheader("Projects behind the numbers")
         st.caption("Pick a value at each level to narrow down to individual projects.")
@@ -466,20 +566,19 @@ with tab_drill:
                 sub = sub[sub[c] == choice]
         tt = stage_totals(sub)
         st.markdown(f"**{n_projects(sub['project_number'].nunique())}**"
-                    + (f" · committed **{md_usd(tt['Committed'][0])}**" if "Committed" in stages else "")
-                    + (f" · pipeline **{md_usd(tt['Pipeline'][0])}**" if "Pipeline" in stages else ""))
+                    + "".join(f" · {sg.lower()} **{md_usd(tt[sg][0])}**" for sg in STAGES if sg in stages))
         proj_tbl = (sub.groupby("project_number")
                     .agg(amount=("amount", lambda s: s.sum(min_count=1)),
                          instruments=("instrument", lambda s: ", ".join(sorted(set(s)))))
                     .reset_index()
                     .merge(projects[["project_number", "project_name", "company_name", "country", "board_fy",
-                                     "dept_name", "commitment_stage", "status", "project_url"]],
+                                     "dept_name", "portfolio_stage", "status", "project_url"]],
                            on="project_number", how="left")
                     .sort_values("amount", ascending=False))
         proj_tbl = proj_tbl[["project_name", "company_name", "country", "board_fy", "dept_name", "instruments",
-                             "commitment_stage", "status", "amount", "project_url"]].rename(columns={
+                             "portfolio_stage", "status", "amount", "project_url"]].rename(columns={
             "project_name": "Project", "company_name": "Client", "country": "Country / region", "board_fy": "FY",
-            "dept_name": "Department", "instruments": "Instruments", "commitment_stage": "Stage",
+            "dept_name": "Department", "instruments": "Instruments", "portfolio_stage": "Stage",
             "status": "Status", "amount": "Amount (US$m)", "project_url": "Disclosure"})
         st.dataframe(proj_tbl, hide_index=True, width="stretch", height=420,
                      column_config={"Disclosure": st.column_config.LinkColumn(display_text="Open"),
@@ -504,7 +603,8 @@ with tab_country:
                    f"IFC region: {info.get('ifc_region')} ({info.get('ifc_region_basis') or '—'})")
         tc_ = stage_totals(cf)
         k1, k2, k3 = st.columns(3)
-        k1.metric("Committed", fmt_usd(tc_["Committed"][0]) if "Committed" in stages else "not selected")
+        k1.metric("Active portfolio", fmt_usd(tc_["Active portfolio"][0]) if "Active portfolio" in stages
+                  else "not selected")
         k2.metric("Pipeline", fmt_usd(tc_["Pipeline"][0]) if "Pipeline" in stages else "not selected")
         k3.metric("Projects", f"{cp['project_number'].nunique():,}")
 
@@ -524,10 +624,10 @@ with tab_country:
 
             st.markdown("**Largest projects**")
             show = (cp.sort_values("amount", ascending=False)
-                    [["project_name", "company_name", "board_fy", "dept_name", "commitment_stage", "amount",
+                    [["project_name", "company_name", "board_fy", "dept_name", "portfolio_stage", "amount",
                       "project_url"]]
                     .rename(columns={"project_name": "Project", "company_name": "Client", "board_fy": "FY",
-                                     "dept_name": "Department", "commitment_stage": "Stage",
+                                     "dept_name": "Department", "portfolio_stage": "Stage",
                                      "amount": "Amount (US$m)", "project_url": "Disclosure"}))
             st.dataframe(show.head(20), hide_index=True, width="stretch",
                          column_config={"Disclosure": st.column_config.LinkColumn(display_text="Open"),
@@ -558,7 +658,7 @@ with tab_country:
                     themes = ce.explode("themes").dropna(subset=["themes"])
                     tcount = themes.groupby("themes").size().sort_values(ascending=True).reset_index(name="Paragraphs")
                     fig = px.bar(tcount, x="Paragraphs", y="themes", orientation="h", title="Paragraphs by theme",
-                                 color_discrete_sequence=[STAGE_COLORS["Committed"]])
+                                 color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
                     fig.update_traces(hovertemplate="%{y}: %{x} paragraph(s)<extra></extra>")
                     st.plotly_chart(style_fig(fig, max(260, 26 * len(tcount) + 80)), width="stretch",
                                     theme="streamlit")
@@ -578,7 +678,7 @@ with tab_list:
     cols = {"project_number": "Project no.", "project_name": "Project", "company_name": "Client",
             "business_line": "Business line", "dept_name": "Department", "country": "Country / region",
             "ifc_region": "IFC region", "industry": "Industry", "board_fy": "FY", "board_fy_basis": "FY basis",
-            "commitment_stage": "Stage", "status": "Status", "amount": "Amount (US$m)",
+            "portfolio_stage": "Stage", "status": "Status", "amount": "Amount (US$m)",
             "total_approved_usd_m": "Approved as published (US$m)", "amount_basis": "Amount basis",
             "environmental_category": "E&S category", "income_level": "Income group (current)",
             "ifc_region_basis": "Basis for IFC region", "project_url": "Disclosure"}
@@ -595,10 +695,13 @@ with tab_list:
 # ---------------------------------------------------------------- notes
 with tab_notes:
     st.markdown("""
-**Committed and pipeline**
-- *Committed*: projects IFC has signed — active, completed, or signed and awaiting disbursement.
-- *Pipeline*: projects approved by the Board but not yet signed, or still awaiting Board approval.
-  Some projects awaiting approval do not yet show an amount.
+**Stages: active portfolio, completed and pipeline**
+- *Active portfolio*: signed projects that are still ongoing — active, or signed and awaiting disbursement.
+  This is IFC's current exposure and is shown first because it needs the closest monitoring.
+- *Completed*: finished projects. They form the track record and are excluded by default; add them with the
+  Stage filter.
+- *Pipeline*: projects approved by the Board but not yet signed, or still awaiting Board approval. They are not
+  yet legal commitments, their amounts may change, and some do not yet show an amount.
 - *On hold*: projects IFC has put on hold. Excluded by default.
 
 **Who: business lines and departments**

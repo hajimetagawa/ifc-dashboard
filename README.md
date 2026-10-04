@@ -23,8 +23,10 @@ All tools and data sources are free. No paid AI or cloud services are used.
 
 ## Important notes on the data
 
-- **Committed vs pipeline.** `commitment_stage` groups project status: *Committed* = signed (Active, Completed,
-  Pending Disbursement); *Pipeline* = Pending Signing or Pending Approval; *On hold* = Hold.
+- **Portfolio stages.** `portfolio_stage` groups project status: *Active portfolio* = signed and ongoing
+  (Active, Pending Disbursement) — the current exposure that needs the closest monitoring; *Completed* = the track
+  record; *Pipeline* = Pending Signing or Pending Approval (not yet a legal commitment; amounts may change or be
+  missing); *On hold* = Hold.
 - **Business lines (who).** `business_line` (FIG, MAS, INF, Funds & Tech, Equity Portfolio, Other) is derived from
   the department name with keyword rules in `sources/business_line_rules.csv`. Assumptions: the recorded department
   is the unit responsible at some point after approval (not necessarily the originating unit), and business lines

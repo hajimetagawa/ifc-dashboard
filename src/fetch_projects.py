@@ -61,12 +61,14 @@ PROGRAM_NAME_PREFIXES = ("GTFP",)
 AMOUNT_OVERRIDES = ROOT / "sources" / "amount_overrides.csv"
 BUSINESS_LINE_RULES = ROOT / "sources" / "business_line_rules.csv"
 
-# コミットの段階（ステータスから判定）
-#   Committed: 署名済み（実行中・完了・実行待ち）
-#   Pipeline : 理事会承認済みで署名待ち、または理事会の承認待ち
-#   On hold  : 保留中
-COMMITMENT_STAGE = {
-    "Active": "Committed", "Completed": "Committed", "Pending Disbursement": "Committed",
+# 案件の段階（ステータスから判定）
+#   Active portfolio: 署名済みで現在も継続中（実行中、または署名済みで実行待ち）。重点的に監視する対象
+#   Completed       : 完了済み。これまでの実績
+#   Pipeline        : 理事会承認済みで署名待ち、または理事会の承認待ち。今後加わる可能性がある案件
+#   On hold         : 保留中
+PORTFOLIO_STAGE = {
+    "Active": "Active portfolio", "Pending Disbursement": "Active portfolio",
+    "Completed": "Completed",
     "Pending Signing": "Pipeline", "Pending Approval": "Pipeline",
     "Hold": "On hold",
 }
@@ -157,7 +159,7 @@ def tidy(records: list[dict]) -> pd.DataFrame:
         df.loc[df["approval_fy"].isna() & projected_fy.notna(), "board_fy_basis"] = "Projected"
 
     if "status" in df.columns:
-        df["commitment_stage"] = df["status"].map(COMMITMENT_STAGE).fillna("Other").astype("string")
+        df["portfolio_stage"] = df["status"].map(PORTFOLIO_STAGE).fillna("Other").astype("string")
     if "department" in df.columns:
         df = classify_department(df)
     return flag_program_amounts(df)
@@ -247,7 +249,7 @@ def summarize(df: pd.DataFrame) -> None:
               f"（承認額 {prog['total_approved_usd_m'].sum():,.0f} 百万ドルを集計から除外。"
               f"全体の {prog['total_approved_usd_m'].sum() / max(u['total_approved_usd_m'].sum(), 1):.0%}）")
         print(f"集計に使う承認額の合計: {u['approved_usd_m_for_sum'].sum():,.0f} 百万ドル")
-    for col in ["commitment_stage", "business_line"]:
+    for col in ["portfolio_stage", "business_line"]:
         if col in df.columns:
             u = df.drop_duplicates("project_number")
             print(f"\n{col} の内訳（案件数・集計用の承認額 百万ドル）:")

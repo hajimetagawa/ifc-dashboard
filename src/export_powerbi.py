@@ -6,7 +6,7 @@ DuckDB のデータを、Power BI で読み込むための Parquet ファイル�
 
 出力（data/curated/powerbi/）:
     projects.parquet             … 案件（1案件1行）。金額の集計には approved_usd_m_for_sum を使う
-                                   事業部門（business_line）・部署（dept_name）・コミットの段階（commitment_stage）を含む
+                                   事業部門（business_line）・部署（dept_name）・案件の段階（portfolio_stage: Active portfolio / Completed / Pipeline / On hold）を含む
     project_instruments.parquet  … 案件 × 投融資手段（融資・株式・保証・リスク管理商品）の承認額
     countries.parquet            … 国（1国1行、キー: iso3）。案件のない国も含む（has_ifc_projects で区別）
     industries.parquet           … 業種（1業種1行、キー: industry）
@@ -44,7 +44,7 @@ PID = "doc_id || '|' || page::VARCHAR || '|' || block_no::VARCHAR"
 QUERIES = {
     "projects": """
         SELECT project_number, project_name, company_name, country, iso3,
-               business_line, dept_name, dept_subunit, commitment_stage,
+               business_line, dept_name, dept_subunit, portfolio_stage,
                wb_region, income_level, lending_type, ifc_region, ifc_region_basis,
                industry, coalesce(product_line, 'Not specified') AS product_line, department,
                status, status IN ('Active', 'Pending Disbursement') AS is_active,
