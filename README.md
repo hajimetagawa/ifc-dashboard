@@ -16,8 +16,11 @@ but every filter can be changed to cover other regions and industries.
    handling multi-column layouts and removing headers, footers and boilerplate.
 4. **Tagging** – tags each paragraph with countries, industries and themes using editable keyword dictionaries,
    so that paragraphs can be joined to projects by country and industry.
-5. **Dashboard** – a Streamlit app with an overview, country profiles (figures next to report text),
-   a filterable project list and notes on the data.
+5. **Dashboard** – a Streamlit app that reads as one story, tab by tab: (1) the active portfolio today and
+   where its risks sit, (2) how commitments built up and what is in the pipeline (who, how, where, what),
+   (3) a drill-down to the projects behind the numbers, with CSV download, and (4) a country profile that puts
+   figures next to report text. The sidebar separates the *scope* (business line, region, country; applies to
+   every tab) from the *period and stage* (applies to every tab except the active portfolio).
 
 All tools and data sources are free. No paid AI or cloud services are used.
 
@@ -56,6 +59,11 @@ All tools and data sources are free. No paid AI or cloud services are used.
   projects ("Confirmed (IFC department)"). Other countries are assigned provisionally from the World Bank region
   (`ifc_region_basis` shows which).
 - **Current classifications.** World Bank regions and income groups are today's classifications, applied to all years.
+- **Country risk.** `country_indicators` holds country-level data in one long format (country × indicator ×
+  as-of date) so that new public sources can be added without changing the dashboard's structure. The first
+  source is the OECD Country Risk Classification (0 = lowest, 7 = highest), parsed from the OECD's published PDF.
+  The OECD produces it to set minimum premium rates for export credits and does not endorse other uses; the
+  dashboard shows it with that caveat. High-income OECD and euro-area countries are not classified.
 - **Keyword tagging** shows that a paragraph mentions a topic, not that the topic is its main subject.
   Tables of contents, footnotes, bibliographies, table rows, repeated paragraphs and boilerplate are
   excluded before tagging.
@@ -66,6 +74,7 @@ All tools and data sources are free. No paid AI or cloud services are used.
 |---|---|---|
 | `data/raw/pdf/` | Downloaded PDF reports (never modified) | No |
 | `data/raw/structured/` | Raw API responses (JSON) | No |
+| `data/raw/ebrd/` | EBRD files, dated (`inbox/` takes new downloads) | No |
 | `data/extracted/` | Markdown conversions of PDFs (optional) | No |
 | `data/curated/` | Cleaned data (Parquet, DuckDB) | No |
 | `sources/` | Report register, reference tables and dictionaries (CSV) | Yes |
@@ -93,7 +102,9 @@ uv run python src/fetch_projects.py      # 1. project data from the Finances One
 uv run python src/build_country_ref.py   # 2. regions, income groups, IFC regions
 uv run python src/extract_pdfs.py        # 3. text from PDF reports in data/raw/pdf/
 uv run python src/tag_blocks.py          # 4. country / industry / theme tags
-uv run python src/export_powerbi.py      # 5. (optional) Parquet files for Power BI
+uv run python src/fetch_country_data.py  # 5. country risk data (OECD country risk classification)
+uv run python src/build_ebrd.py          # 6. EBRD data (see "Updating the EBRD data")
+uv run python src/export_powerbi.py      # 7. (optional) Parquet files for Power BI
 uv run streamlit run app/app.py          # dashboard at http://localhost:8501
 ```
 
@@ -102,8 +113,35 @@ Useful options:
 - `fetch_projects.py --input <raw.json>` re-processes a saved API response without calling the API.
 - `build_country_ref.py --input <raw.json>` does the same for the World Bank country data.
 - `extract_pdfs.py` only processes new or changed PDFs; `--force` re-processes all of them.
+- `fetch_country_data.py --no-download` rebuilds the country data from the saved source files;
+  `--download-only` only saves the latest source files to `data/raw/country/`.
 
 After rebuilding the data, restart the dashboard (it caches data while running).
+
+## Updating the EBRD data (monthly)
+
+EBRD publishes two files on its [Projects page](https://www.ebrd.com/home/work-with-us/projects.html):
+an Excel workbook of investments since 1991 (amounts, split into debt, equity and guarantees) and a CSV list of
+projects (project number, status and link to the project page, but no amounts).
+
+1. Download both files and put them, unrenamed, in `data/raw/ebrd/inbox/`.
+2. Run `uv run python src/build_ebrd.py`.
+
+The script recognises each file by its content, moves it to `data/raw/ebrd/` under a dated name
+(`ebrd_investments_asof_YYYYMMDD.xlsx` using the as-of date on the workbook's cover;
+`ebrd_projects_YYYYMMDD.csv` using the download date), and rebuilds the EBRD tables from the latest file of each
+kind. Earlier CSV files are kept to build a status history. It prints checks: the total against the workbook's
+total row, the instrument split, unmatched country names and the share of operations linked to the CSV.
+
+How the two files are combined: the workbook has no project numbers, so operations are linked to the CSV by
+normalised name and country. About half the operations (61% of the amount; 75% of those signed in the last five
+years) are linked. Most unlinked operations are sub-loans under framework facilities (e.g. risk-sharing
+facilities), which have no project page.
+
+Caveats when comparing with IFC: EBRD amounts are net cumulative investment (after cancellations, including
+later increases), in € millions at month-end rates, dated by the original signing date. IFC amounts are
+Board-approved commitments in US$ millions by approval fiscal year (July–June). EBRD also lends to the public
+sector (`portfolio_class = State`); IFC does not.
 
 ## Adding PDF reports
 
@@ -141,6 +179,13 @@ Edit these files and re-run the relevant script to apply changes.
 | `documents` | table | One row per PDF report, with page count and file hash |
 | `doc_blocks` | table | Text blocks with page, position, language and kind (paragraph, caption, short, boilerplate, toc, reference, note, table, duplicate) |
 | `doc_text` | view | English body paragraphs only |
+| `country_indicators` | table | Country-level indicators (country × indicator × as-of date), e.g. OECD country risk |
+| `ebrd_operations` | table | EBRD investments: one row per operation and country allocation, with debt / equity / guarantee amounts (€m), sector, public or private, signing date, and the linked project number and status |
+| `ebrd_operation_instruments` | table | EBRD amounts per operation and instrument (Debt, Equity, Guarantee) |
+| `ebrd_projects` | table | EBRD project list: one row per project, with status, stage and project page |
+| `ebrd_project_status_history` | table | EBRD project status at each saved CSV download |
+| `ebrd_status_changes` | view | EBRD projects whose status changed between the last two downloads |
+| `country_risk` | view | Latest value of each indicator per country, one row per country (used by the dashboard) |
 | `doc_countries` | table | Countries covered by each report |
 | `block_tags` | table | Country, industry and theme tags per paragraph |
 | `evidence` | view | Paragraph text with its tags in one row (used by the dashboard) |
@@ -170,6 +215,7 @@ so the same data can be analysed in Power BI Desktop without connecting to DuckD
 |---|---|---|
 | `projects.parquet` | one row per project | `project_number` |
 | `project_instruments.parquet` | project × instrument | – |
+| `country_indicators.parquet` | country × indicator × as-of date | – |
 | `countries.parquet` | one row per country, including countries without IFC projects | `iso3` |
 | `industries.parquet` | one row per industry | `industry` |
 | `documents.parquet` | one row per report | `doc_id` |
@@ -182,6 +228,7 @@ Relationships (many-to-one):
 
 - `projects[iso3]` → `countries[iso3]`; `projects[industry]` → `industries[industry]`
 - `project_instruments[project_number]` → `projects[project_number]`
+- `country_indicators[iso3]` → `countries[iso3]` (filter on `indicator`)
 - `paragraphs[doc_id]` → `documents[doc_id]`
 - `paragraph_countries`, `paragraph_industries`, `paragraph_themes` → `paragraphs[paragraph_id]`
   (set cross-filter direction to *Both*)
@@ -202,6 +249,7 @@ PyMuPDF is licensed under AGPL-3.0; check its terms before distributing this cod
   https://financesone.worldbank.org/api-explorer?id=DS00499
 - World Bank country API: https://api.worldbank.org/v2/country
 - IFC regional page (Middle East and Central Asia): https://www.ifc.org/en/where-we-work/middle-east
+- OECD Country Risk Classification: https://www.oecd.org/en/topics/sub-issues/country-risk-classification.html
 - IFC publications as listed in `sources/pdf_manifest.csv`
 
 Use of the data is subject to the terms of the respective sources.

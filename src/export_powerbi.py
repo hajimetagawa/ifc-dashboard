@@ -19,6 +19,7 @@ DuckDB のデータを、Power BI で読み込むための Parquet ファイル�
 Power BI でのリレーションシップ（すべて多対一。→ の先が「一」側）:
     projects[iso3]                      → countries[iso3]
     project_instruments[project_number] → projects[project_number]
+    country_indicators[iso3]            → countries[iso3]   （指標・基準日ごとに複数行。indicator で絞って使う）
     projects[industry]                  → industries[industry]
     paragraphs[doc_id]                  → documents[doc_id]
     paragraph_countries[paragraph_id]   → paragraphs[paragraph_id]   （クロスフィルター: 双方向）
@@ -76,6 +77,11 @@ QUERIES = {
         SELECT project_number, instrument, approved_usd_m, approved_usd_m_for_sum
         FROM project_instruments
     """,
+    # 国別のリスク指標（縦長の形式。src/fetch_country_data.py で作成）
+    "country_indicators": """
+        SELECT iso3, indicator, indicator_name, value, value_label, as_of, source, source_url
+        FROM country_indicators
+    """,
     "industries": """
         SELECT DISTINCT industry FROM projects_enriched WHERE industry IS NOT NULL
         UNION
@@ -124,7 +130,11 @@ def main() -> None:
         wb_json=wb_files[-1].as_posix(), ifc_regions=(ROOT / "sources" / "ifc_regions.csv").as_posix())
     # 読み取り専用で開く（他の処理の書き込みを妨げない）
     with duckdb.connect(str(DB_PATH), read_only=True) as con:
+        tables = {r[0] for r in con.execute("SELECT table_name FROM information_schema.tables").fetchall()}
         for name, sql in QUERIES.items():
+            if name == "country_indicators" and "country_indicators" not in tables:
+                print("省略  country_indicators（src/fetch_country_data.py をまだ実行していないため）")
+                continue
             con.execute(f"CREATE OR REPLACE TEMP VIEW _export AS {sql}")
             n = con.execute("SELECT count(*) FROM _export").fetchone()[0]
             key = UNIQUE_KEYS.get(name)

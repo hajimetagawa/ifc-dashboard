@@ -24,7 +24,6 @@ from pathlib import Path
 import duckdb
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
 
 import watchlist  # watchlist: 試行的な注視リスト。削除するときはこの行と、render を呼ぶ行を消す
@@ -45,6 +44,14 @@ STAGE_COLORS = {"Active portfolio": "#2a78d6", "Completed": "#9c9b96", "Pipeline
 INSTRUMENT_ORDER = ["Loan", "Equity", "Guarantee", "Risk management", "Unallocated", "Not specified"]
 INSTRUMENT_COLORS = {"Loan": "#eb6834", "Equity": "#1baf7a", "Guarantee": "#eda100",
                      "Risk management": "#e87ba4", "Unallocated": "#a8a7a2", "Not specified": "#c3c2b7"}
+# OECD国別リスク分類（0＝最も低い〜7＝最も高い）の色。リスクが高いほど濃い青
+CRC_ORDER = [f"Category {i}" for i in range(8)] + ["Not classified", "No data"]
+CRC_COLORS = {"Category 0": "#b7d3f6", "Category 1": "#9ec5f4", "Category 2": "#86b6ef", "Category 3": "#6da7ec",
+              "Category 4": "#5598e7", "Category 5": "#2a78d6", "Category 6": "#1c5cab", "Category 7": "#0d366b",
+              "Not classified": "#a8a7a2", "No data": "#d3d2cc"}
+CRC_NOTE = ("OECD country risk classification (0 = lowest, 7 = highest), as of {as_of}. The OECD produces it to set "
+            "minimum premium rates for officially supported export credits and does not endorse other uses; it is "
+            "shown here as an indicator of country risk.")
 BUSINESS_LINE_ORDER = ["FIG", "MAS", "INF", "Funds & Tech", "Equity Portfolio", "Other"]
 BUSINESS_LINE_COLORS = {"FIG": "#2a78d6", "MAS": "#4a3aa7", "INF": "#008300", "Funds & Tech": "#e87ba4",
                         "Equity Portfolio": "#eda100", "Other": "#a8a7a2"}
@@ -101,6 +108,15 @@ def load_data(db: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     with duckdb.connect(db, read_only=True) as con:
         projects = con.sql("SELECT * FROM projects_enriched").df()
         instruments = con.sql("SELECT * FROM project_instruments").df()
+        names = {r[0] for r in con.execute("SELECT table_name FROM information_schema.tables").fetchall()}
+        # 国別のリスク指標（src/fetch_country_data.py で作成。まだ作っていなければ空欄）
+        risk = (con.sql("SELECT * FROM country_risk").df() if "country_risk" in names
+                else pd.DataFrame(columns=["iso3", "oecd_crc", "oecd_crc_label", "oecd_crc_as_of"]))
+    projects = projects.merge(risk, on="iso3", how="left")
+    # 表示用の区分: 分類あり → "Category n"、分類対象外 → "Not classified"、国が特定できない案件 → "No data"
+    projects["oecd_crc_group"] = projects["oecd_crc_label"].where(projects["oecd_crc"].notna())
+    projects.loc[projects["oecd_crc"].isna() & projects["oecd_crc_label"].notna(), "oecd_crc_group"] = "Not classified"
+    projects["oecd_crc_group"] = projects["oecd_crc_group"].fillna("No data")
     projects["country"] = projects["country"].fillna("Unknown").map(display_country)
     projects["ifc_region"] = projects["ifc_region"].fillna("Unassigned")
     projects["industry"] = projects["industry"].fillna("Not specified")
@@ -160,28 +176,17 @@ projects, facts_all = load_data(str(DB_PATH))
 ev = load_evidence_tables(str(DB_PATH))
 
 # ---------------------------------------------------------------- filters (sidebar)
-st.sidebar.header("Filters")
-st.sidebar.caption("Each filter answers one part of the question: who, how, where, what and when.")
-
-fy_min, fy_max = int(projects["board_fy"].min()), int(projects["board_fy"].max())
-fy = st.sidebar.slider("When — fiscal year", fy_min, fy_max, (max(fy_min, 2015), fy_max),
-                       help="IFC fiscal years run July–June. Pipeline projects not yet approved are placed in "
-                            "the fiscal year of their projected Board date.")
-stages = st.sidebar.multiselect("Stage", STAGES, default=DEFAULT_STAGES,
-                                help="Active portfolio: signed and ongoing (active, or awaiting disbursement). "
-                                     "Completed: finished projects (track record). "
-                                     "Pipeline: approved but not yet signed, or awaiting Board approval. "
-                                     "On hold: put on hold by IFC.")
+# 左側は2つに分ける: 「対象範囲」（すべてのタブに効く）と「期間と段階」（Active portfolio 以外に効く）
+st.sidebar.header("Scope")
+st.sidebar.caption("Who and where to look at. Applies to every tab.")
 
 bl_options = [b for b in BUSINESS_LINE_ORDER if b in set(projects["business_line"])]
 business_line = st.sidebar.selectbox(
     "Who — business line", [ALL] + bl_options,
     index=(bl_options.index(DEFAULT_BUSINESS_LINE) + 1) if DEFAULT_BUSINESS_LINE in bl_options else 0,
     format_func=lambda b: b if b == ALL else f"{b} — {BUSINESS_LINE_NAMES.get(b, b)}",
-    help="Derived from the name of the IFC department responsible for the project.")
-dept_pool = projects if business_line == ALL else projects[projects["business_line"] == business_line]
-departments = sorted(dept_pool["dept_name"].unique())
-department = st.sidebar.selectbox("Who — department", [ALL] + departments)
+    help="Derived from the name of the IFC department responsible for the project. "
+         "Departments within a business line are shown in the charts and in Drill down.")
 
 regions = sorted(projects["ifc_region"].unique())
 region = st.sidebar.selectbox("Where — IFC region", [ALL] + regions,
@@ -189,14 +194,26 @@ region = st.sidebar.selectbox("Where — IFC region", [ALL] + regions,
 country_pool = projects if region == ALL else projects[projects["ifc_region"] == region]
 country_choice = st.sidebar.selectbox("Where — country", [ALL] + sorted(country_pool["country"].unique()))
 
-industry = st.sidebar.selectbox("What — industry", [ALL] + sorted(projects["industry"].unique()))
-instrument = st.sidebar.selectbox("How — instrument", [ALL] + [i for i in INSTRUMENT_ORDER
-                                                              if i in set(facts_all["instrument"])])
-metric = st.sidebar.radio("Measure", ["Amount", "Number of projects"], horizontal=True)
-include_program = st.sidebar.checkbox(
-    "Include program-level amounts", value=False,
-    help="Some programs (e.g. GTFP) record the program-wide approval ceiling against each participating "
-         "institution. Summing these overstates commitments substantially, so they are excluded by default.")
+with st.sidebar.expander("More filters"):
+    industry = st.selectbox("What — industry", [ALL] + sorted(projects["industry"].unique()))
+    instrument = st.selectbox("How — instrument", [ALL] + [i for i in INSTRUMENT_ORDER
+                                                          if i in set(facts_all["instrument"])])
+    include_program = st.checkbox(
+        "Include program-level amounts", value=False,
+        help="Some programs (e.g. GTFP) record the program-wide approval ceiling against each participating "
+             "institution. Summing these overstates commitments substantially, so they are excluded by default.")
+
+st.sidebar.header("Period and stage")
+st.sidebar.caption("Applies to every tab except *Active portfolio*, which always shows all ongoing projects.")
+fy_min, fy_max = int(projects["board_fy"].min()), int(projects["board_fy"].max())
+fy = st.sidebar.slider("Fiscal year", fy_min, fy_max, (max(fy_min, 2015), fy_max),
+                       help="IFC fiscal years run July–June. Pipeline projects not yet approved are placed in "
+                            "the fiscal year of their projected Board date.")
+stages = st.sidebar.multiselect("Stage", STAGES, default=DEFAULT_STAGES,
+                                help="Active portfolio: signed and ongoing (active, or awaiting disbursement). "
+                                     "Completed: finished projects (track record). "
+                                     "Pipeline: approved but not yet signed, or awaiting Board approval. "
+                                     "On hold: put on hold by IFC.")
 
 # ---------------------------------------------------------------- apply filters
 def apply_filters(fy_range: tuple[int, int] | None, stage_list: list[str]) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -206,8 +223,6 @@ def apply_filters(fy_range: tuple[int, int] | None, stage_list: list[str]) -> tu
         q = q[q["board_fy"].between(*fy_range)]
     if business_line != ALL:
         q = q[q["business_line"] == business_line]
-    if department != ALL:
-        q = q[q["dept_name"] == department]
     if region != ALL:
         q = q[q["ifc_region"] == region]
     if country_choice != ALL:
@@ -226,13 +241,10 @@ def apply_filters(fy_range: tuple[int, int] | None, stage_list: list[str]) -> tu
 
 p, facts = apply_filters(fy, stages)
 
-is_amount = metric == "Amount"
-value_label = "US$ millions" if is_amount else "Projects"
+value_label = "US$ millions"
 
 # 「Who」「Where」は、1つに絞ると一段細かい区分を表示する
 who_col, who_label = ("business_line", "business line") if business_line == ALL else ("dept_name", "department")
-if department != ALL:
-    who_col, who_label = "dept_name", "department"
 where_col, where_label = ("ifc_region", "IFC region") if region == ALL else ("country", "country")
 what_col, what_label = "industry", "industry"
 how_col, how_label = "instrument", "instrument"
@@ -240,7 +252,7 @@ how_col, how_label = "instrument", "instrument"
 
 def scope_text() -> str:
     who = ("all IFC business lines" if business_line == ALL
-           else (department if department != ALL else f"{business_line} ({BUSINESS_LINE_NAMES.get(business_line)})"))
+           else f"{business_line} ({BUSINESS_LINE_NAMES.get(business_line)})")
     where = country_choice if country_choice != ALL else (region if region != ALL else "all regions")
     parts = [f"**{who}**", f"in **{where}**"]
     if industry != ALL:
@@ -266,19 +278,13 @@ def breakdown(df: pd.DataFrame, col: str, top: int = 10) -> pd.DataFrame:
     """区分 × 段階の集計。上位 top 件以外は "Other" にまとめる。"""
     if df.empty:
         return pd.DataFrame(columns=[col, "portfolio_stage", "value"])
-    if is_amount:
-        g = df.groupby([col, "portfolio_stage"])["amount"].sum()
-    else:
-        g = df.groupby([col, "portfolio_stage"])["project_number"].nunique()
+    g = df.groupby([col, "portfolio_stage"])["amount"].sum()
     g = g.rename("value").reset_index()
     order = g.groupby(col)["value"].sum().sort_values(ascending=False)
     keep = list(order.index[:top])
     if len(order) > top:
         rest = df[~df[col].isin(keep)]
-        if is_amount:
-            o = rest.groupby("portfolio_stage")["amount"].sum()
-        else:
-            o = rest.groupby("portfolio_stage")["project_number"].nunique()
+        o = rest.groupby("portfolio_stage")["amount"].sum()
         other = o.rename("value").reset_index().assign(**{col: f"Other ({len(order) - top})"})
         g = pd.concat([g[g[col].isin(keep)], other], ignore_index=True)
     return g
@@ -305,8 +311,12 @@ st.title("IFC Portfolio Explorer")
 st.markdown("Who at IFC commits how much, **through which instruments**, **where** and **in which sectors** — "
             "and what is still in the pipeline.")
 
-tab_active, tab_overview, tab_drill, tab_country, tab_list, tab_notes = st.tabs(
-    ["Active portfolio", "Overview", "Drill down", "Country profile", "Project list", "Notes on the data"])
+st.caption("Read the tabs from left to right: **1** what IFC holds today and where the risks sit → "
+           "**2** how commitments have built up and what is coming → **3** which projects are behind the numbers "
+           "→ **4** one country in detail.")
+
+tab_active, tab_overview, tab_drill, tab_country, tab_notes = st.tabs(
+    ["1 Active portfolio", "2 Commitments", "3 Drill down", "4 Country profile", "Notes on the data"])
 
 empty = p.empty
 
@@ -362,7 +372,9 @@ with tab_active:
         high_es = pa[env.str.startswith("A") | env.str.startswith("FI-1")]
         poor = pa[pa["lending_type"].eq("IDA").fillna(False) | pa["income_level"].eq("Low income").fillna(False)]
         old_ = pa[(CURRENT_FY - pa["board_fy"]) >= 10]
+        high_crc = pa[pa["oecd_crc"] >= 6]
         prof = pd.DataFrame([
+            ("OECD country risk category 6–7", high_crc["amount"].sum(), len(high_crc)),
             ("Equity (no contractual repayment)", eq_amt, fa[fa["instrument"] == "Equity"]["project_number"].nunique()),
             ("High E&S category (A or FI-1)", high_es["amount"].sum(), len(high_es)),
             ("IDA or low-income countries", poor["amount"].sum(), len(poor)),
@@ -370,27 +382,46 @@ with tab_active:
             ("Signed, awaiting disbursement", undisb["amount"].sum(), len(undisb)),
         ], columns=["Characteristic", "Amount", "Projects"])
         prof["Share"] = prof["Amount"] / total * 100 if total else 0
-        left, right = st.columns([3, 2])
         fig = px.bar(prof, x="Share", y="Characteristic", orientation="h", custom_data=["Amount", "Projects"],
                      title="Share of the active portfolio with each characteristic",
                      category_orders={"Characteristic": list(prof["Characteristic"])},
                      color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
         fig.update_traces(hovertemplate="%{y}<br>%{x:.1f}% · US$%{customdata[0]:,.0f}m · "
                                         "%{customdata[1]} project(s)<extra></extra>")
-        fig = style_fig(fig, 300)
+        fig = style_fig(fig, 330)
         fig.update_xaxes(title_text="% of active portfolio amount", ticksuffix="%", range=[0, 100])
-        left.plotly_chart(fig, width="stretch", theme="streamlit")
+        st.plotly_chart(fig, width="stretch", theme="streamlit")
 
-        # 経過年数
-        age = (CURRENT_FY - pa["board_fy"]).clip(lower=0)
-        buckets = pd.cut(age, bins=[-1, 2, 5, 9, 200], labels=["0–2 years", "3–5 years", "6–9 years", "10+ years"])
-        ga = pa.assign(age=buckets).groupby("age", observed=False)["amount"].sum().reset_index()
-        fig = px.bar(ga, x="age", y="amount", title=f"Years since approval (FY{CURRENT_FY})",
-                     color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
-        fig.update_traces(hovertemplate="%{x}<br>US$%{y:,.0f}m<extra></extra>")
-        fig = style_fig(fig, 300)
-        fig.update_yaxes(title_text="US$ millions", tickformat=",")
-        right.plotly_chart(fig, width="stretch", theme="streamlit")
+        # 国のリスク（OECD国別リスク分類）
+        st.subheader("Country risk")
+        # 0〜7の全段階を常に同じ並びで表示する（該当がない段階は0）。分類対象外・国なしは該当があるときだけ
+        crc = pa.groupby("oecd_crc_group")["amount"].sum().reindex(CRC_ORDER, fill_value=0).reset_index()
+        crc = crc[crc["oecd_crc_group"].str.startswith("Category") | (crc["amount"] > 0)]
+        crc["axis_label"] = crc["oecd_crc_group"].str.replace("Category ", "", regex=False)
+        rated = pa.dropna(subset=["oecd_crc", "amount"])
+        w_avg = (rated["oecd_crc"] * rated["amount"]).sum() / rated["amount"].sum() if rated["amount"].sum() else None
+        as_of = pa["oecd_crc_as_of"].dropna()
+        if crc["amount"].sum() == 0 or as_of.empty:
+            st.info("Country risk data is not loaded yet (run src/fetch_country_data.py).")
+        else:
+            left, right = st.columns([3, 1])
+            fig = px.bar(crc, x="axis_label", y="amount", color="oecd_crc_group",
+                         title="Active portfolio by OECD country risk category",
+                         category_orders={"axis_label": list(crc["axis_label"]), "oecd_crc_group": CRC_ORDER},
+                         color_discrete_map=CRC_COLORS)
+            fig.update_traces(hovertemplate="%{fullData.name}<br>US$%{y:,.0f}m<extra></extra>")
+            fig = style_fig(fig, 320)
+            fig.update_layout(showlegend=False)
+            # 「0」〜「7」が数値と解釈されないよう、区分の軸として扱う
+            fig.update_xaxes(type="category", title_text="OECD country risk category (0 = lowest, 7 = highest)")
+            fig.update_yaxes(title_text="US$ millions", tickformat=",")
+            left.plotly_chart(fig, width="stretch", theme="streamlit")
+            right.metric("Amount-weighted average category", f"{w_avg:.1f}" if w_avg is not None else "—",
+                         help="Average OECD category of the countries, weighted by active amount. "
+                              "Multi-country projects and unclassified countries are left out.")
+            right.metric("In categories 6–7", fmt_usd(high_crc["amount"].sum()))
+            st.caption(CRC_NOTE.format(as_of=pd.Timestamp(as_of.max()).strftime("%d %B %Y"))
+                       + " Multi-country projects have no single country and show as *No data*.")
 
         watchlist.render(pa, fa, CURRENT_FY, fmt_usd)  # watchlist: 削除するときはこの行を消す
 
@@ -430,6 +461,17 @@ with tab_overview:
         if notes:
             st.caption(" ".join(notes) + " See *Notes on the data*.")
 
+        st.subheader("When")
+        by_fy = facts.groupby(["board_fy", "portfolio_stage"])["amount"].sum().rename("value").reset_index()
+        fig = px.bar(by_fy, x="board_fy", y="value", color="portfolio_stage",
+                     title="Approved amount by fiscal year",
+                     category_orders={"portfolio_stage": STAGES}, color_discrete_map=STAGE_COLORS)
+        fig.update_traces(hovertemplate="FY%{x}<br>%{fullData.name}: %{y:,.0f}<extra></extra>")
+        fig = style_fig(fig, 380)
+        fig.update_xaxes(tickprefix="FY", dtick=1 if fy[1] - fy[0] <= 12 else 2, title_text="IFC fiscal year (July–June)")
+        fig.update_yaxes(title_text=value_label, tickformat=",")
+        st.plotly_chart(fig, width="stretch", theme="streamlit")
+
         st.subheader("Who, how, where and what")
         st.caption("Dark blue: active portfolio · grey: completed · light blue: pipeline. Choose one business line "
                    "or region on the left to see departments or countries.")
@@ -443,59 +485,6 @@ with tab_overview:
                         width="stretch", theme="streamlit")
         c4.plotly_chart(stacked_bar(breakdown(facts, what_col), what_col, "What — by industry"),
                         width="stretch", theme="streamlit")
-
-        # 資金の流れ（サンキー図）: Who → How → Where → What
-        st.subheader("How the money flows")
-        st.caption(f"Amounts (US$ millions) from each {who_label}, through each instrument, to each {where_label} "
-                   "and industry. Hover over a band to see its amount. Smaller items are grouped as \"Other\".")
-        flow = facts.dropna(subset=["amount"])
-        flow = flow[flow["amount"] > 0]
-        if flow.empty:
-            st.info("No amounts to show for the current filters.")
-        else:
-            levels = [who_col, how_col, where_col, what_col]
-            flow = flow.copy()
-            flow["_colour_key"] = flow["business_line"]   # 帯の色は事業部門で決める
-            for col in levels:
-                top = flow.groupby(col)["amount"].sum().sort_values(ascending=False).index[:8]
-                flow[col] = flow[col].where(flow[col].isin(top), "Other")
-            labels, index = [], {}
-            for li, col in enumerate(levels):
-                for v in flow.groupby(col)["amount"].sum().sort_values(ascending=False).index:
-                    index[(li, v)] = len(labels)
-                    labels.append(v)
-            src, dst, val, colr = [], [], [], []
-            for li in range(len(levels) - 1):
-                g = flow.groupby([levels[li], levels[li + 1], "_colour_key"])["amount"].sum().reset_index()
-                for r in g.itertuples(index=False):
-                    src.append(index[(li, r[0])]); dst.append(index[(li + 1, r[1])]); val.append(r[3])
-                    hexc = BUSINESS_LINE_COLORS.get(r[2], "#a8a7a2").lstrip("#")
-                    colr.append(f"rgba({int(hexc[0:2], 16)},{int(hexc[2:4], 16)},{int(hexc[4:6], 16)},0.35)")
-            fig = go.Figure(go.Sankey(
-                arrangement="snap",
-                node=dict(label=labels, pad=12, thickness=14, color="#8a8984",
-                          hovertemplate="%{label}<br>US$%{value:,.0f}m<extra></extra>"),
-                link=dict(source=src, target=dst, value=val, color=colr,
-                          hovertemplate="%{source.label} → %{target.label}<br>US$%{value:,.0f}m<extra></extra>")))
-            for x, txt in zip([0, 0.33, 0.67, 1.0], ["WHO", "HOW", "WHERE", "WHAT"]):
-                fig.add_annotation(x=x, y=1.06, xref="paper", yref="paper", text=f"<b>{txt}</b>",
-                                   showarrow=False, xanchor="center" if 0 < x < 1 else ("left" if x == 0 else "right"))
-            fig.update_layout(height=520, margin=dict(l=10, r=10, t=40, b=10), font=dict(size=12))
-            st.plotly_chart(fig, width="stretch", theme="streamlit")
-
-        st.subheader("When")
-        if is_amount:
-            by_fy = facts.groupby(["board_fy", "portfolio_stage"])["amount"].sum().rename("value").reset_index()
-        else:
-            by_fy = facts.groupby(["board_fy", "portfolio_stage"])["project_number"].nunique().rename("value").reset_index()
-        fig = px.bar(by_fy, x="board_fy", y="value", color="portfolio_stage",
-                     title=f"{'Amount' if is_amount else 'Projects'} by fiscal year",
-                     category_orders={"portfolio_stage": STAGES}, color_discrete_map=STAGE_COLORS)
-        fig.update_traces(hovertemplate="FY%{x}<br>%{fullData.name}: %{y:,.0f}<extra></extra>")
-        fig = style_fig(fig, 380)
-        fig.update_xaxes(tickprefix="FY", dtick=1 if fy[1] - fy[0] <= 12 else 2, title_text="IFC fiscal year (July–June)")
-        fig.update_yaxes(title_text=value_label, tickformat=",")
-        st.plotly_chart(fig, width="stretch", theme="streamlit")
 
 # ---------------------------------------------------------------- drill down
 DIMENSIONS = {
@@ -583,6 +572,20 @@ with tab_drill:
         st.dataframe(proj_tbl, hide_index=True, width="stretch", height=420,
                      column_config={"Disclosure": st.column_config.LinkColumn(display_text="Open"),
                                     "Amount (US$m)": st.column_config.NumberColumn(format="%,.1f")})
+        # CSV には、表に出していない属性（E&S分類、所得水準、国のリスクなど）も含める
+        csv_cols = {"project_number": "Project no.", "project_name": "Project", "company_name": "Client",
+                    "business_line": "Business line", "dept_name": "Department", "country": "Country / region",
+                    "ifc_region": "IFC region", "industry": "Industry", "board_fy": "FY",
+                    "board_fy_basis": "FY basis", "portfolio_stage": "Stage", "status": "Status",
+                    "amount": "Amount (US$m)", "total_approved_usd_m": "Approved as published (US$m)",
+                    "amount_basis": "Amount basis", "environmental_category": "E&S category",
+                    "income_level": "Income group (current)", "oecd_crc_group": "OECD country risk",
+                    "ifc_region_basis": "Basis for IFC region", "project_url": "Disclosure"}
+        csv = (p[p["project_number"].isin(sub["project_number"])][list(csv_cols)]
+               .sort_values(["board_fy", "project_number"], ascending=[False, True]).rename(columns=csv_cols))
+        st.download_button(f"Download these {len(csv):,} projects as CSV (all attributes)",
+                           csv.to_csv(index=False).encode("utf-8-sig"),
+                           file_name="ifc_projects_selected.csv", mime="text/csv")
 
 # ---------------------------------------------------------------- country profile
 with tab_country:
@@ -600,7 +603,8 @@ with tab_country:
         st.caption(f"World Bank region: {info.get('wb_region') or '—'} · "
                    f"Income group (current): {info.get('income_level') or '—'} · "
                    f"Lending category: {info.get('lending_type') or '—'} · "
-                   f"IFC region: {info.get('ifc_region')} ({info.get('ifc_region_basis') or '—'})")
+                   f"IFC region: {info.get('ifc_region')} ({info.get('ifc_region_basis') or '—'}) · "
+                   f"OECD country risk: {info.get('oecd_crc_label') if pd.notna(info.get('oecd_crc_label')) else '—'}")
         tc_ = stage_totals(cf)
         k1, k2, k3 = st.columns(3)
         k1.metric("Active portfolio", fmt_usd(tc_["Active portfolio"][0]) if "Active portfolio" in stages
@@ -610,10 +614,7 @@ with tab_country:
 
         left, right = st.columns([1, 1])
         with left:
-            if is_amount:
-                g = cf.groupby(["board_fy", "instrument"])["amount"].sum().rename("value").reset_index()
-            else:
-                g = cf.groupby(["board_fy", "instrument"])["project_number"].nunique().rename("value").reset_index()
+            g = cf.groupby(["board_fy", "instrument"])["amount"].sum().rename("value").reset_index()
             fig = px.bar(g, x="board_fy", y="value", color="instrument", title="By fiscal year and instrument",
                          category_orders={"instrument": INSTRUMENT_ORDER}, color_discrete_map=INSTRUMENT_COLORS)
             fig.update_traces(hovertemplate="FY%{x}<br>%{fullData.name}: %{y:,.0f}<extra></extra>")
@@ -673,25 +674,6 @@ with tab_country:
                                        + (f" | {', '.join(r.themes)}" if r.themes else ""))
                             st.write(r.text)
 
-# ---------------------------------------------------------------- project list
-with tab_list:
-    cols = {"project_number": "Project no.", "project_name": "Project", "company_name": "Client",
-            "business_line": "Business line", "dept_name": "Department", "country": "Country / region",
-            "ifc_region": "IFC region", "industry": "Industry", "board_fy": "FY", "board_fy_basis": "FY basis",
-            "portfolio_stage": "Stage", "status": "Status", "amount": "Amount (US$m)",
-            "total_approved_usd_m": "Approved as published (US$m)", "amount_basis": "Amount basis",
-            "environmental_category": "E&S category", "income_level": "Income group (current)",
-            "ifc_region_basis": "Basis for IFC region", "project_url": "Disclosure"}
-    table = (p[list(cols)].sort_values(["board_fy", "project_number"], ascending=[False, True]).rename(columns=cols))
-    st.caption(f"{len(table):,} project(s). *Amount* follows the filters (instrument, program-level setting); "
-               "*Approved as published* is the total in the source data.")
-    st.dataframe(table, hide_index=True, width="stretch",
-                 column_config={"Disclosure": st.column_config.LinkColumn(display_text="Open"),
-                                "Amount (US$m)": st.column_config.NumberColumn(format="%,.1f"),
-                                "Approved as published (US$m)": st.column_config.NumberColumn(format="%,.1f")})
-    st.download_button("Download CSV", table.to_csv(index=False).encode("utf-8-sig"),
-                       file_name="ifc_projects_filtered.csv", mime="text/csv")
-
 # ---------------------------------------------------------------- notes
 with tab_notes:
     st.markdown("""
@@ -722,7 +704,7 @@ with tab_notes:
 - IFC's own investment as approved by the Board, in US$ millions. Disbursements, outstanding balances,
   repayments and mobilised third-party funds are not included.
 - Fiscal years are IFC fiscal years (July–June). Projects not yet approved are placed in the fiscal year of
-  their projected Board date (shown as *Projected* in the *FY basis* column of the project list).
+  their projected Board date (shown as *Projected* in the *FY basis* column of the CSV download in *Drill down*).
 
 **Program-level amounts**
 - For some programs, such as the Global Trade Finance Program (GTFP), the program-wide approval ceiling is
@@ -739,6 +721,14 @@ with tab_notes:
   classification.
 - World Bank regions and income groups are the current classifications and are applied to all years.
 
+**Country risk**
+- Country risk is the OECD Country Risk Classification (0 = lowest risk, 7 = highest), which covers transfer
+  and convertibility risk and force majeure (war, expropriation, civil disturbance, natural disasters). The latest
+  published list is used for all projects.
+- The OECD produces the classification to set minimum premium rates for officially supported export credits and
+  does not endorse its use for other purposes. High-income OECD and euro-area countries are not classified.
+  Multi-country projects have no single country and appear as *No data*.
+
 **Text from IFC reports**
 - Paragraphs from IFC reports are tagged with countries, industries and themes using keyword dictionaries.
   A tag indicates that a paragraph mentions a topic, not that the topic is its main subject.
@@ -748,5 +738,6 @@ with tab_notes:
 **Sources**
 - IFC Investment Services Projects, World Bank Group Finances One (dataset DS00499)
 - World Bank country classification API
+- OECD Country Risk Classifications of the Participants to the Arrangement on Officially Supported Export Credits
 - IFC publications listed in each country profile
 """)

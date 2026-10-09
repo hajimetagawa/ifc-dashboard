@@ -27,7 +27,7 @@ SIGNALS = {
     "Large exposure": f"US${LARGE_AMOUNT_USD_M:,.0f}m or more, or in the top {LARGE_TOP_SHARE:.0%} by amount",
     "Equity": "Includes an equity investment (no contractual repayment; exposed to valuation changes)",
     "High E&S category": "Environmental and social category A or FI-1 (significant potential impact)",
-    "IDA / low-income country": "Country eligible for IDA or classified as low income (current classification)",
+    "High country risk": "Country in OECD country risk category 6 or 7 (latest classification)",
     "Long-running": f"Approved {LONG_RUNNING_YEARS} or more fiscal years ago and still active",
     "Client concentration": f"The client's active projects together make up {CLIENT_SHARE:.0%} or more of the "
                             "active portfolio in the current selection",
@@ -46,8 +46,7 @@ def flag(active: pd.DataFrame, facts: pd.DataFrame, current_fy: int) -> pd.DataF
     a["Large exposure"] = (amount >= LARGE_AMOUNT_USD_M) | ((amount >= top_cut) & (amount > 0))
     a["Equity"] = a["project_number"].isin(equity)
     a["High E&S category"] = env.str.startswith("A") | env.str.startswith("FI-1")
-    a["IDA / low-income country"] = a["lending_type"].eq("IDA").fillna(False) | \
-        a["income_level"].eq("Low income").fillna(False)
+    a["High country risk"] = (a["oecd_crc"] >= 6).fillna(False) if "oecd_crc" in a else False
     a["Long-running"] = (current_fy - a["board_fy"]).ge(LONG_RUNNING_YEARS).fillna(False)
     client_amt = amount.groupby(client).transform("sum")
     a["Client concentration"] = (client_amt >= CLIENT_SHARE * amount.sum()) & (amount.sum() > 0) & \

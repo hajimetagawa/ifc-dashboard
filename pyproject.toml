@@ -14,6 +14,7 @@ dependencies = [
     "streamlit",         # ダッシュボード
     "plotly",            # インタラクティブなグラフ
     "pymupdf",           # PDF本文のブロック単位での抽出（段組み対応）
+    "openpyxl>=3.1.5",
 ]
 
 [dependency-groups]
