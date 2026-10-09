@@ -1,0 +1,12 @@
+{
+  "tab": "overview",
+  "text": "The active portfolio of US$152.1bn is concentrated in a few places. Africa (22%), Latin America and the Caribbean (20%) and East Asia and Pacific (15%) together hold a little over half of it. FIG and MAS account for roughly two-thirds by business line, with FIG alone at 40%. Spread across 2,479 projects, the portfolio is broad by country count (123) but heavily weighted toward a few regions and business lines.\n\nNew commitments by approval year averaged US$24.6bn a year in FY2024–FY2026, against US$14.7bn in FY2021–FY2023 (+67%). Africa showed the largest regional change (US$2.1bn a year), and Africa also has the largest regional share of the active portfolio. The data show the two coincide but do not say whether one explains the other. The comparison uses approval-year commitments, which are not the same measure as the stock of active projects, so the +67% should not be read as growth in the portfolio itself.\n\nThe pipeline of US$11.1bn across 321 projects is smaller than one year of recent average commitments. This should be read with caution, because 164 of the 321 projects show no amount yet. The total and the regional shares (Global 20%, Africa 19%) therefore rest on incomplete data. The latest approval years may also be understated, since approved projects not yet signed sit in the pipeline. Pipeline projects are not yet legal commitments.",
+  "model": "claude-sonnet-5-5",
+  "generated_on": "2026-10-09",
+  "data_as_of": "28 September 2026",
+  "scope": "the whole of IFC",
+  "signature": {
+    "tab": "overview",
+    "include_program": false
+  }
+}

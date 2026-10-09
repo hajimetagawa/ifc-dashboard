@@ -16,13 +16,51 @@ but every filter can be changed to cover other regions and industries.
    handling multi-column layouts and removing headers, footers and boilerplate.
 4. **Tagging** – tags each paragraph with countries, industries and themes using editable keyword dictionaries,
    so that paragraphs can be joined to projects by country and industry.
-5. **Dashboard** – a Streamlit app that reads as one story, tab by tab: (1) the active portfolio today and
-   where its risks sit, (2) how commitments built up and what is in the pipeline (who, how, where, what),
-   (3) a drill-down to the projects behind the numbers, with CSV download, and (4) a country profile that puts
-   figures next to report text. The sidebar separates the *scope* (business line, region, country; applies to
-   every tab) from the *period and stage* (applies to every tab except the active portfolio).
+5. **Dashboard** – a Streamlit app that reads as one story, tab by tab: (1) the whole of IFC today, (2) what
+   the portfolio in a chosen scope is made of, (3) where its risks concentrate, (4) how it compares with the EBRD
+   in the same countries, and (5) one country in detail, with figures next to report text.
 
 All tools and data sources are free. No paid AI or cloud services are used.
+
+## Data flow
+
+![How the data flows: five public sources are processed by the scripts in src/ into one DuckDB database, which the dashboard tabs read](docs/data_flow.svg)
+
+Each source is processed by a script in `src/` into one DuckDB database, which the dashboard reads; ISO3 country
+codes link IFC projects, country risk, EBRD operations and report text. The same picture is shown on the
+dashboard's *Notes on the data* tab. To change it, edit `docs/make_data_flow.py` and run
+`uv run python docs/make_data_flow.py`.
+
+| Step | Script | Main processing |
+|---|---|---|
+| IFC investment projects | `src/fetch_projects.py` | One row per project; program-level amounts set aside; business line from department; stage from status |
+| World Bank country data | `src/build_country_ref.py` | ISO3 country codes; World Bank and IFC regions |
+| OECD country risk | `src/fetch_country_data.py` | OECD category (0–7) per country |
+| EBRD investments | `src/build_ebrd.py` | Files archived by date; Excel operations linked to the CSV project list by name and country |
+| IFC reports | `src/extract_pdfs.py` → `src/tag_blocks.py` | Paragraphs with page numbers, boilerplate removed; country, industry and theme tags |
+| Power BI (optional) | `src/export_powerbi.py` | Parquet files for Power BI |
+
+### What each dashboard tab uses
+
+| Tab | Database tables | Selection and amounts |
+|---|---|---|
+| 1 IFC Overview | `projects_enriched`, `project_instruments` | Whole of IFC. Active portfolio and pipeline now; new commitments by approval fiscal year (signed projects). |
+| 2 Portfolio Profile | `projects_enriched`, `project_instruments` | Scope, fiscal years and stages from the sidebar. Approved amounts (US$m) by approval fiscal year. |
+| 3 Risk Profile | `projects_enriched`, `project_instruments`, `country_risk` | Scope from the sidebar; all active projects. Approved amounts; OECD category of the project's country. |
+| 4 vs EBRD | `projects_enriched`, `project_instruments`, `ebrd_operations`, `ebrd_operation_instruments`, `country_risk` | IFC signed projects by approval fiscal year (US$) vs EBRD net cumulative investment by year of first signing (€, converted at a rate set on the tab). Countries where both invested; IFC multi-country projects left out, EBRD regional operations included through the EBRD's own country allocation. |
+| 5 Country Profile | `projects_enriched`, `project_instruments`, `country_risk`, `ebrd_operations`, `evidence` | One country; IFC figures follow the sidebar. EBRD investment in the same country; report paragraphs by theme. |
+
+### How often each source is updated
+
+| Source | Update | How |
+|---|---|---|
+| IFC investment projects | Whenever needed | `fetch_projects.py`, then `build_country_ref.py` |
+| World Bank country classification | Once a year (July) | `build_country_ref.py` |
+| OECD country risk classification | After each OECD review (several times a year) | `fetch_country_data.py` |
+| EBRD investments and project list | Monthly | Files into `data/raw/ebrd/inbox/`, then `build_ebrd.py` |
+| IFC reports | When a report is added | `sources/pdf_manifest.csv`, then `extract_pdfs.py` and `tag_blocks.py` |
+
+Restart the dashboard after rebuilding the data; it caches data while running.
 
 ## Important notes on the data
 
@@ -81,6 +119,8 @@ All tools and data sources are free. No paid AI or cloud services are used.
 | `src/` | Data pipeline scripts | Yes |
 | `notebooks/` | Exploration notebooks | Yes |
 | `app/` | Streamlit dashboard | Yes |
+| `content/commentary/` | Saved AI commentary (JSON), reviewed before saving | Yes |
+| `docs/` | Data flow diagram (`data_flow.svg`) and the script that draws it | Yes |
 
 Data files are not committed. Everything in `data/` can be rebuilt by re-running the scripts;
 the origin of each report is recorded in `sources/pdf_manifest.csv`.
@@ -194,16 +234,50 @@ Edit these files and re-run the relevant script to apply changes.
 
 ## Dashboard
 
-- **Overview** – a one-sentence answer to "who commits how much, through which instruments, where and in which
-  sectors", committed and pipeline totals, four breakdowns (who / how / where / what), a flow diagram from
-  business line or department through instrument to region or country and industry, and a fiscal-year trend.
-- **Drill down** – an icicle chart to click from the whole portfolio down to department, country, industry and
-  instrument, and step-by-step selectors that lead to the individual projects behind each figure.
-- **Country profile** – projects by fiscal year and product, the largest projects with links to IFC's
-  disclosure pages, and paragraphs from IFC reports filtered by theme and by the selected industry,
-  with report title and page number.
-- **Project list** – all projects matching the filters, downloadable as CSV.
-- **Notes on the data** – the caveats above, for readers of the dashboard.
+The sidebar sets the *scope* (business line, IFC region, country; default FIG in Middle East and Central Asia),
+which applies to tabs 2–5, and the *period and stage*, which apply where stated on each tab.
+
+1. **IFC Overview** – always the whole of IFC: active portfolio and pipeline as of the data date, a map and
+   region × business line breakdown of the active portfolio, new commitments by fiscal year (by region or
+   business line), and the pipeline by region with the largest pipeline projects.
+2. **Portfolio Profile** – for the chosen scope, period and stages: breakdowns by industry, instrument,
+   department and country; the largest clients; how the instrument and industry (or country) mix of new
+   commitments has shifted by fiscal year; and an icicle chart and selectors leading to individual projects,
+   downloadable as CSV.
+3. **Risk Profile** – all active projects in the scope: concentration by client and country, risk
+   characteristics (country risk, equity, E&S category, IDA/low-income, age, undisbursed), OECD country risk,
+   and a trial watchlist (`app/watchlist.py`) ranking projects by the number of risk signals.
+4. **vs EBRD** – IFC signed projects against EBRD operations in the countries where both invested: amounts by
+   country, the EBRD's public-sector share, the share going to financial institutions, instrument mix, country
+   risk taken and amounts over time. The EBRD sectors compared follow the selected business line.
+5. **Country Profile** – one country: IFC projects by fiscal year and instrument, EBRD investment in the same
+   country, the largest IFC projects, and paragraphs from IFC reports by theme.
+- **Notes on the data** – definitions and caveats for readers of the dashboard.
+
+## Summaries and AI commentary
+
+Each tab ends with a **Summary**: a few paragraphs generated from the figures on that tab by fixed rules
+(`app/summaries.py`). No AI is involved; the thresholds behind words such as *highly concentrated* are listed on
+the *Notes on the data* tab.
+
+For the whole of IFC (all filters set to *All*), tabs 1–4 can also show an **AI commentary** written by Claude
+(Anthropic API). It is generated only on the author's computer, reviewed, and saved to `content/commentary/`
+(committed to Git); the dashboard then shows the saved text and never calls the API itself.
+
+To generate (PowerShell, in the project folder; needs an Anthropic API key and `uv add anthropic` once):
+
+```powershell
+$env:ANTHROPIC_API_KEY = "<your key>"
+$env:IFC_ENABLE_AI_COMMENTARY = "1"
+uv run streamlit run app/app.py
+```
+
+Set all filters to *All*, open *Generate AI commentary (local only)* under a tab's summary and press *Generate*.
+Only the summary and its figures are sent to the model (`claude-sonnet-5-5` by default; set
+`IFC_COMMENTARY_MODEL` to change it), with instructions to use no other facts. Numbers in the draft that do not
+appear in those figures are listed for checking. *Save* writes `content/commentary/<tab>.json`; commit it to
+publish. A saved commentary is shown only when the filters match those used when it was generated, and it is not
+updated when the data change — regenerate it after a data update.
 
 ## Using the data in Power BI
 
