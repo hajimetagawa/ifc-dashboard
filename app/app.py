@@ -21,6 +21,7 @@ import os
 from pathlib import Path
 
 import duckdb
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -78,7 +79,15 @@ BUSINESS_LINE_SECTORS = {
 
 # ---- EBRD との比較
 IFC_COLOR, EBRD_COLOR = "#2a78d6", "#eb6834"
-DEFAULT_EUR_USD = 1.15   # EBRD の金額（百万ユーロ）を米ドルに換算する目安のレート。画面で変更できる
+# EBRD の金額（百万ユーロ、EBRD の基準日の月末レート）を米ドルに換算するレート。EBRD のデータの基準日と同じ日の
+# ECB の参照レートを使う。EBRD のデータを新しい基準日に更新したら、その日のレートをここに加える
+EUR_USD = {"2025-12-31": (1.1750, "ECB euro reference rate, 31 December 2025")}
+WHY_EBRD = ("The EBRD is the multilateral development bank whose business is closest to IFC's: its founding "
+            "agreement directs at least 60% of its commitments to the private sector, it invests through loans, "
+            "equity and guarantees, and its countries of operation overlap with IFC's in Central Asia, Türkiye, "
+            "Central and Eastern Europe and the southern and eastern Mediterranean. Comparing the two in the same "
+            "countries shows where IFC's presence is relatively large or small. The EBRD's private-sector "
+            "operations are compared, since IFC invests only in the private sector.")
 # IFC の事業部門 → 比較に使う EBRD の業種（列, 値, 表示名）。対応がない事業部門は全業種で比べる
 EBRD_SECTOR_MATCH = {
     "FIG": ("sector_group", ["Financial Institutions"], "EBRD financial institutions"),
@@ -90,6 +99,14 @@ EBRD_SECTOR_MATCH = {
 # IFC の案件がない国（IFC の地域が決まらない）で、EBRD が投資している国の地域
 EBRD_REGION_FALLBACK = {"SVK": "Europe", "SVN": "Europe", "CYP": "Europe", "CZE": "Europe", "EST": "Europe",
                         "LVA": "Europe", "LTU": "Europe", "TKM": "Middle East and Central Asia"}
+# 為替リスク: 直近5年の対米ドルの年平均下落率（World Bank の公定レート）の区分
+FX_BUCKETS = [(0.15, "Very high (15%+ a year)"), (0.05, "High (5–15%)"), (0.02, "Moderate (2–5%)"),
+              (-1.0, "Stable (under 2%)")]
+FX_ORDER = [b for _, b in FX_BUCKETS][::-1] + ["No data"]
+FX_COLORS = {"Stable (under 2%)": "#b7d3f6", "Moderate (2–5%)": "#6da7ec", "High (5–15%)": "#1c5cab",
+             "Very high (15%+ a year)": "#0d366b", "No data": "#d3d2cc"}
+# 国旗（flagcdn.com の画像）に使う2文字コード。世界銀行のコードが ISO と違う国だけ言い換える
+FLAG_CODE = {"GZ": "ps", "JG": "je"}
 # 金融手段の表示名を両者でそろえる
 COMMON_INSTRUMENT = {"Loan": "Loan / debt", "Debt": "Loan / debt", "Equity": "Equity", "Guarantee": "Guarantee",
                      "Risk management": "Risk management"}
@@ -146,6 +163,12 @@ def load_risk(con, names: set[str]) -> pd.DataFrame:
             else pd.DataFrame(columns=["iso3", "oecd_crc", "oecd_crc_label", "oecd_crc_as_of"]))
 
 
+def fx_bucket(v) -> str:
+    if pd.isna(v):
+        return "No data"
+    return next(label for cut, label in FX_BUCKETS if v >= cut)
+
+
 @st.cache_data(show_spinner=False)
 def load_data(db: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     with duckdb.connect(db, read_only=True) as con:
@@ -154,6 +177,10 @@ def load_data(db: str) -> tuple[pd.DataFrame, pd.DataFrame]:
         risk = load_risk(con, table_names(con))
     projects = projects.merge(risk, on="iso3", how="left")
     projects["oecd_crc_group"] = crc_group(projects)
+    if "fx_depr_5y" not in projects:              # 為替のデータをまだ取得していないとき
+        projects["fx_depr_5y"] = np.nan
+        projects["fx_depr_5y_label"] = None
+    projects["fx_group"] = projects["fx_depr_5y"].map(fx_bucket)
     projects["country"] = projects["country"].fillna("Unknown").map(display_country)
     projects["ifc_region"] = projects["ifc_region"].fillna("Unassigned")
     projects["industry"] = projects["industry"].fillna("Not specified")
@@ -177,6 +204,8 @@ def load_ebrd(db: str) -> tuple[pd.DataFrame, pd.DataFrame] | None:
         risk = load_risk(con, names)
     ops = ops.merge(risk, on="iso3", how="left")
     ops["oecd_crc_group"] = crc_group(ops)
+    if "fx_depr_5y" not in ops:
+        ops["fx_depr_5y"] = np.nan
     return ops, inst
 
 
@@ -409,6 +438,31 @@ def share_by_year(df: pd.DataFrame, col: str, title: str, colors: dict | None = 
     return fig
 
 
+def pie(df: pd.DataFrame, col: str, title: str, colors: dict | None = None, top: int = 7,
+        other_label: str = "Other", height: int = 380, legend_below: bool = False):
+    """金額の構成比のドーナツグラフ。上位 top 区分以外は「Other (n)」にまとめる。"""
+    g = df.groupby(col)["amount"].sum()
+    g = g[g > 0].sort_values(ascending=False)
+    if len(g) > top:
+        g = pd.concat([g.head(top), pd.Series({f"{other_label} ({len(g) - top})": g.iloc[top:].sum()})])
+    d = g.rename("amount").rename_axis("label").reset_index()
+    cmap = dict(colors or {})
+    for i, k in enumerate(d["label"]):
+        if str(k).startswith(other_label + " ("):
+            cmap[k] = "#c3c2b7"
+        cmap.setdefault(k, PALETTE[i % len(PALETTE)])
+    fig = px.pie(d, names="label", values="amount", title=title, hole=0.45, color="label",
+                 color_discrete_map=cmap, category_orders={"label": list(d["label"])})
+    fig.update_traces(sort=False, direction="clockwise", textinfo="percent", textposition="inside",
+                      insidetextorientation="horizontal",
+                      hovertemplate="%{label}<br>US$%{value:,.0f}m · %{percent}<extra></extra>")
+    fig.update_layout(height=height, margin=dict(l=10, r=10, t=48, b=10), uniformtext_minsize=10,
+                      uniformtext_mode="hide", legend=dict(title=None, font=dict(size=11)))
+    if legend_below:      # 区分が多いときは凡例を下に置き、円を大きくする
+        fig.update_layout(legend=dict(orientation="h", yanchor="top", y=-0.02, x=0))
+    return fig
+
+
 def share_bars(parts: dict[str, pd.Series], color: str, title: str, order: list, colors: dict):
     """機関ごとの構成比を横に並べた100%積み上げ棒（IFC と EBRD の比較用）。"""
     frames = []
@@ -502,15 +556,27 @@ with tab_overview:
     st.subheader("Where the active portfolio is, and what kind")
     left, right = st.columns([3, 2])
     by_cty = oa.dropna(subset=["iso3"]).groupby(["iso3", "country"])["amount"].sum().reset_index()
-    fig = px.choropleth(by_cty, locations="iso3", color="amount", hover_name="country",
-                        color_continuous_scale=["#e3eefb", "#2a78d6", "#0d366b"],
+    by_cty = by_cty[by_cty["amount"] > 0]
+    # 少数の大きい国に色が引っ張られないよう、色は金額の対数で決める（目盛りは金額で表示する）
+    by_cty["log_amount"] = np.log10(by_cty["amount"].clip(lower=1))
+    lo_c = np.log10(max(by_cty["amount"].quantile(0.05), 1))        # ごく小さい国で色の幅を使わない
+    hi_c = by_cty["log_amount"].max()
+    ticks = [v for v in (1, 10, 100, 1000, 10000) if 10 ** lo_c <= v <= 10 ** hi_c]
+    fig = px.choropleth(by_cty, locations="iso3", color="log_amount", hover_name="country", custom_data=["amount"],
+                        range_color=[lo_c, hi_c],
+                        color_continuous_scale=["#e3eefb", "#86b6ef", "#2a78d6", "#0d366b"],
                         title="Active portfolio by country (single-country projects)")
-    fig.update_traces(hovertemplate="%{hovertext}<br>US$%{z:,.0f}m<extra></extra>")
-    fig.update_layout(height=420, margin=dict(l=0, r=0, t=48, b=0), coloraxis_colorbar=dict(title="US$m"),
+    fig.update_traces(hovertemplate="%{hovertext}<br>US$%{customdata[0]:,.0f}m<extra></extra>")
+    fig.update_layout(height=420, margin=dict(l=0, r=0, t=48, b=0),
+                      coloraxis_colorbar=dict(title="US$", tickvals=[np.log10(v) for v in ticks],
+                                              ticktext=[fmt_usd(v).replace("US$", "") for v in ticks]),
                       geo=dict(showframe=False, showcoastlines=False, projection_type="natural earth",
                                bgcolor="rgba(0,0,0,0)"))
     show(fig, left)
-    g = oa.groupby(["ifc_region", "business_line"])["amount"].sum().rename("value").reset_index()
+    left.caption("Colours follow a logarithmic scale (each step is ten times larger), so that countries with "
+                 "smaller portfolios remain distinguishable from one another.")
+    g = oa[~oa["ifc_region"].isin(NO_REGION)].groupby(["ifc_region", "business_line"])["amount"].sum() \
+        .rename("value").reset_index()
     show(stacked_bar(g[g["value"] > 0], "ifc_region", "By IFC region and business line", color="business_line",
                      colors=BUSINESS_LINE_COLORS, color_order=BUSINESS_LINE_ORDER), right)
 
@@ -619,14 +685,15 @@ with tab_profile:
             st.caption(" ".join(notes) + " See *Notes on the data*.")
 
         st.subheader("What it is made of")
-        st.caption("Dark blue: active portfolio · grey: completed · light blue: pipeline. Choose one business line "
-                   "or region on the left to see departments or countries.")
+        st.caption("Share of the approved amount for the stages selected on the left. Choose one business line or "
+                   "region on the left to see departments or countries.")
         c1, c2 = st.columns(2)
-        show(stacked_bar(breakdown(facts, "industry"), "industry", "What — by industry"), c1)
-        show(stacked_bar(breakdown(facts, "instrument"), "instrument", "How — by instrument"), c2)
+        show(pie(facts, "industry", "What — by industry"), c1)
+        show(pie(facts, "instrument", "How — by instrument", colors=INSTRUMENT_COLORS), c2)
         c3, c4 = st.columns(2)
-        show(stacked_bar(breakdown(facts, who_col), who_col, f"Who commits — by {who_label}"), c3)
-        show(stacked_bar(breakdown(facts, where_col), where_col, f"Where — by {where_label}"), c4)
+        show(pie(facts, who_col, f"Who commits — by {who_label}",
+                 colors=BUSINESS_LINE_COLORS if who_col == "business_line" else None), c3)
+        show(pie(facts, where_col, f"Where — by {where_label}"), c4)
 
         st.subheader("Largest clients")
         client_of = p.set_index("project_number")["company_name"].fillna("(client not specified)")
@@ -789,30 +856,24 @@ with tab_risk:
 
         st.subheader("Concentration")
         c1, c2 = st.columns(2)
-        for col_ui, key, label in ((c1, "client", "client"), (c2, "country", "country or region")):
+        for col_ui, key, label in ((c1, "client", "clients"), (c2, "country", "countries")):
             top = pa.groupby(key)["amount"].sum().sort_values(ascending=False).head(10)
-            df_top = top.reset_index().rename(columns={"amount": "value"})
-            df_top["share"] = df_top["value"] / total * 100
-            fig = px.bar(df_top, x="value", y=key, orientation="h", custom_data=["share"],
-                         title=f"Top {len(top)} by {label} — {top.sum() / total:.0%} of the active portfolio",
-                         category_orders={key: list(top.index)},
-                         color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
-            fig.update_traces(hovertemplate="%{y}<br>US$%{x:,.0f}m · %{customdata[0]:.1f}% of active<extra></extra>")
-            fig = style_fig(fig, 30 * len(top) + 130)
-            fig.update_xaxes(title_text="US$ millions", tickformat=",")
-            show(fig, col_ui)
+            show(pie(pa, key, f"Top 10 {label} — {top.sum() / total:.0%} of the active portfolio", top=10,
+                     other_label=f"Other {label}", height=560, legend_below=True), col_ui)
 
         st.subheader("Risk characteristics")
         env = pa["environmental_category"].fillna("")
         high_es = pa[env.str.startswith("A") | env.str.startswith("FI-1")]
         poor = pa[pa["lending_type"].eq("IDA").fillna(False) | pa["income_level"].eq("Low income").fillna(False)]
         old_ = pa[(CURRENT_FY - pa["board_fy"]) >= 10]
+        fx_high = pa[pa["fx_depr_5y"] >= 0.05]
         prof = pd.DataFrame([
             ("OECD country risk category 6–7", high_crc["amount"].sum(), len(high_crc)),
             ("Equity (no contractual repayment)", eq_amt, fa[fa["instrument"] == "Equity"]["project_number"].nunique()),
             ("High E&S category (A or FI-1)", high_es["amount"].sum(), len(high_es)),
             ("IDA or low-income countries", poor["amount"].sum(), len(poor)),
             ("Approved 10+ fiscal years ago", old_["amount"].sum(), len(old_)),
+            ("Currency down 5%+ a year against US$ (5 years)", fx_high["amount"].sum(), len(fx_high)),
             ("Signed, awaiting disbursement", undisb["amount"].sum(), len(undisb)),
         ], columns=["Characteristic", "Amount", "Projects"])
         prof["Share"] = prof["Amount"] / total * 100
@@ -856,6 +917,73 @@ with tab_risk:
             st.caption(CRC_NOTE.format(as_of=pd.Timestamp(as_of.max()).strftime("%d %B %Y"))
                        + " Multi-country projects have no single country and show as *No data*.")
 
+        # ---- 為替リスク
+        st.subheader("Currency risk")
+        if pa["fx_depr_5y"].notna().sum() == 0:
+            st.info("Exchange-rate data is not loaded yet (run src/fetch_country_data.py --source wb_fx).")
+        else:
+            left, right = st.columns([3, 1])
+            fxg = pa.groupby("fx_group")["amount"].sum().reindex(FX_ORDER, fill_value=0).reset_index()
+            fig = px.bar(fxg, x="fx_group", y="amount", color="fx_group", color_discrete_map=FX_COLORS,
+                         category_orders={"fx_group": FX_ORDER},
+                         title="Active portfolio by how fast the country's currency fell against the US$")
+            fig.update_traces(hovertemplate="%{x}<br>US$%{y:,.0f}m<extra></extra>")
+            fig = style_fig(fig, 320)
+            fig.update_layout(showlegend=False)
+            fig.update_xaxes(title_text="Average annual depreciation against the US$ over the last 5 years")
+            fig.update_yaxes(title_text="US$ millions", tickformat=",")
+            show(fig, left)
+            fx_c = fx_high.groupby("country")["amount"].sum().sort_values(ascending=False)
+            right.metric("Depreciating 5%+ a year", f"{fx_high['amount'].sum() / total:.0%}",
+                         help=fmt_usd(fx_high["amount"].sum()) + " of the active portfolio")
+            right.caption("Largest: " + (", ".join(fx_c.index[:3]) if len(fx_c) else "none"))
+            fx_year = pd.to_datetime(pa["fx_as_of"].dropna()).dt.year.max() if "fx_as_of" in pa else None
+            st.caption("The source data does not say in which currency each investment is made. Most IFC loans are "
+                       "in US dollars: a falling local currency then weighs on clients whose income is in that "
+                       "currency and returns to IFC as credit risk, while local-currency loans and equity carry it "
+                       "directly. Rates are World Bank official exchange rates (annual averages"
+                       + (f", latest {fx_year}" if fx_year else "") + "); in some countries the official rate "
+                       "differs from the market rate.")
+
+            # ---- 国のリスクの散布図（国リスク × 為替 × 金額）
+            st.subheader("Country risk map")
+            cm = (pa.dropna(subset=["iso3"]).groupby(["country", "ifc_region"])
+                  .agg(amount=("amount", "sum"), projects=("project_number", "count"),
+                       crc=("oecd_crc", "first"), fx=("fx_depr_5y", "first"),
+                       crc_label=("oecd_crc_label", "first"), fx_label=("fx_depr_5y_label", "first"))
+                  .reset_index())
+            cm = cm[(cm["amount"] > 0) & cm["crc"].notna() & cm["fx"].notna()]
+            if cm.empty:
+                st.info("No country in the selection has both an OECD category and exchange-rate data.")
+            else:
+                cm["fx_pct"] = cm["fx"] * 100
+                fig = px.scatter(cm, x="fx_pct", y="crc", size="amount", color="ifc_region", size_max=55,
+                                 hover_name="country", custom_data=["amount", "projects", "fx_label"],
+                                 title="Each bubble is a country: country risk (OECD) against currency weakness, "
+                                       "sized by active amount",
+                                 color_discrete_sequence=PALETTE)
+                fig.update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color="#ffffff")),
+                                  hovertemplate="%{hovertext}<br>US$%{customdata[0]:,.0f}m · %{customdata[1]} "
+                                                "project(s)<br>OECD category %{y:.0f} · currency %{customdata[2]}"
+                                                "<extra></extra>")
+                big = cm.nlargest(8, "amount")
+                for r in big.itertuples():
+                    fig.add_annotation(x=r.fx_pct, y=r.crc, text=r.country, showarrow=False, yshift=14,
+                                       font=dict(size=10, color="#5f5e5a"))
+                fig.add_vline(x=5, line_dash="dot", line_color="#a8a7a2")
+                fig.add_hline(y=5.5, line_dash="dot", line_color="#a8a7a2")
+                fig = style_fig(fig, 480)
+                fig.update_xaxes(title_text="Average annual depreciation against the US$, last 5 years (%)",
+                                 ticksuffix="%", zeroline=True)
+                fig.update_yaxes(title_text="OECD country risk category (0 = lowest, 7 = highest)",
+                                 range=[-0.5, 7.8], dtick=1)
+                fig.update_layout(legend=dict(y=-0.2))
+                show(fig)
+                st.caption("Countries in the upper right combine high country risk with a quickly weakening "
+                           "currency. Dotted lines mark OECD category 6 and 5% annual depreciation. Labels show the "
+                           "eight largest countries. Unclassified countries and multi-country projects are not "
+                           "shown.")
+
         watchlist.render(pa, fa, CURRENT_FY, fmt_usd)  # watchlist: 削除するときはこの行を消す
 
         # ---- Summary
@@ -874,6 +1002,8 @@ with tab_risk:
             "crc67_countries": list(crc67_c.index[:3]),
             "equity": eq_amt / total, "high_es": high_es["amount"].sum() / total, "old": old_["amount"].sum() / total,
             "undisb": undisb["amount"].sum(), "watch": watch,
+            "fx_high": fx_high["amount"].sum() / total if pa["fx_depr_5y"].notna().any() else None,
+            "fx_countries": list(fx_high.groupby("country")["amount"].sum().sort_values(ascending=False).index[:3]),
         }), "risk", "Generated from the figures on this tab using fixed rules (see Notes on the data). Based on "
                     "Board-approved amounts; outstanding balances, repayments and credit quality are not in the "
                     "source data.")
@@ -887,14 +1017,12 @@ with tab_ebrd:
         e_ops, e_inst = ebrd
         e_last = int(e_ops["signing_year"].max())
         y0, y1 = fy[0], min(fy[1], e_last)
-        c1, c2 = st.columns(2)
-        private_only = c1.toggle("EBRD private sector only", value=True,
-                                 help="IFC invests only in the private sector. The EBRD also lends to governments "
-                                      "and public entities; switch this off to include them.")
-        rate = c2.number_input("EUR/USD rate used to convert EBRD amounts", min_value=0.5, max_value=2.0,
-                               value=DEFAULT_EUR_USD, step=0.01,
-                               help="EBRD amounts are in euros at month-end reported rates. One rate converts them "
-                                    "all; the default is a round approximation — change it if needed.")
+        st.markdown(WHY_EBRD)
+        private_only = True        # IFC は民間向けだけなので、EBRD も民間向けで比べる（政府向けは「役割」の図で示す）
+        e_as_of = str(pd.Timestamp(e_ops["as_of"].max()).date())
+        rate, rate_src = EUR_USD.get(e_as_of, EUR_USD[max(EUR_USD)])
+        if e_as_of not in EUR_USD:
+            rate_src += f" (no rate set for the EBRD data date {e_as_of}; add it to EUR_USD in app.py)"
 
         # IFC: 署名済みの案件（実行中＋完了）。業種・金融手段の絞り込みは使わない（構成をゆがめないため）
         ic, ifx = apply_filters((y0, y1), COMMITTED, what_how=False)
@@ -924,12 +1052,11 @@ with tab_ebrd:
 
         bl_text = (f"{business_line} ({BUSINESS_LINE_NAMES.get(business_line)})" if business_line != ALL
                    else "all IFC business lines")
-        st.markdown(f"**IFC {bl_text}** compared with **{e_label}**"
-                    + (" (private sector only)" if private_only else " (private and public sector)")
+        st.markdown(f"**IFC {bl_text}** compared with **{e_label}** (private sector)"
                     + f", in the countries where both invested in {y0}–{y1}"
                     + (f" within **{region}**" if region != ALL else "") + ".")
         st.caption(f"IFC: signed projects (active or completed) by approval fiscal year, in US\\$. EBRD: net "
-                   f"cumulative investment by year of first signing, in euros converted at {rate:.2f} US\\$ per euro. "
+                   f"cumulative investment by year of first signing, in euros converted at {rate:.4f} US\\$ per euro ({rate_src}). "
                    f"EBRD data ends in {e_last}. The industry and instrument filters on the left do not apply here. "
                    "The definitions differ, so read the comparison as orders of magnitude and shares rather than "
                    "exact figures — see *Notes on the data*.")
@@ -973,19 +1100,31 @@ with tab_ebrd:
             cmp_["country"] = [names.get(i, i) for i in cmp_.index]
             cmp_ = cmp_.assign(total=cmp_["IFC"] + cmp_["EBRD"]).sort_values("total", ascending=False)
             top = cmp_.head(15)
-            long = top.melt(id_vars="country", value_vars=["IFC", "EBRD"], var_name="Institution", value_name="value")
-            fig = px.bar(long, x="value", y="country", color="Institution", orientation="h", barmode="group",
-                         title=f"Amount by country (top {len(top)} of {len(cmp_)})",
-                         category_orders={"country": list(top["country"]), "Institution": ["IFC", "EBRD"]},
-                         color_discrete_map={"IFC": IFC_COLOR, "EBRD": EBRD_COLOR})
-            fig.update_traces(hovertemplate="%{y} · %{fullData.name}<br>US$%{x:,.0f}m<extra></extra>")
-            fig = style_fig(fig, 36 * len(top) + 150)
-            fig.update_layout(legend=dict(y=-60 / (36 * len(top) + 40)))
-            fig.update_xaxes(title_text="US$ millions (EBRD converted)", tickformat=",")
+            sc = cmp_[(cmp_["IFC"] > 0) & (cmp_["EBRD"] > 0)].copy()
+            sc["region"] = [iso_region.get(i, EBRD_REGION_FALLBACK.get(i, "Other")) for i in sc.index]
+            sc["share"] = sc["IFC"] / sc["total"] * 100
+            fig = px.scatter(sc, x="IFC", y="EBRD", size="total", color="region", hover_name="country", log_x=True,
+                             log_y=True, size_max=45, custom_data=["share"], color_discrete_sequence=PALETTE,
+                             title="Each bubble is a country: IFC against EBRD amount (log scales)")
+            fig.update_traces(marker=dict(opacity=0.75, line=dict(width=0.5, color="#ffffff")),
+                              hovertemplate="%{hovertext}<br>IFC US$%{x:,.0f}m · EBRD US$%{y:,.0f}m<br>"
+                                            "IFC share %{customdata[0]:.0f}%<extra></extra>")
+            lo, hi = sc[["IFC", "EBRD"]].min().min() / 1.5, sc[["IFC", "EBRD"]].max().max() * 1.5
+            fig.add_shape(type="line", x0=lo, y0=lo, x1=hi, y1=hi, line=dict(dash="dot", color="#a8a7a2"))
+            fig.add_annotation(x=np.log10(hi / 1.6), y=np.log10(hi / 1.6), text="same amount", showarrow=False,
+                               xshift=-10, yshift=-12, font=dict(size=10, color="#8a8984"))
+            for r in sc.nlargest(10, "total").itertuples():
+                fig.add_annotation(x=np.log10(r.IFC), y=np.log10(r.EBRD), text=r.country, showarrow=False,
+                                   yshift=13, font=dict(size=10, color="#5f5e5a"))
+            fig = style_fig(fig, 34 * len(top) + 150)
+            fig.update_xaxes(title_text="IFC, US$ millions")
+            fig.update_yaxes(title_text="EBRD, US$ millions (converted)")
             c1, c2 = st.columns([3, 2])
             show(fig, c1)
+            c1.caption("Countries above the dotted line receive more from the EBRD than from IFC; countries below it, "
+                       "more from IFC. Labels show the ten largest countries.")
             show(presence_chart(top.set_index("country"), "IFC share of the two, by country",
-                                height=36 * len(top) + 150), c2)
+                                height=34 * len(top) + 150), c2)
             multi = ic_all[ic_all["iso3"].isna()]
             if multi["amount"].sum() > 0:
                 st.caption(f"IFC also has {md_usd(multi['amount'].sum())} in "
@@ -1110,11 +1249,20 @@ with tab_country:
         cf = facts[facts["country"] == country]
         iso3 = cp["iso3"].dropna().iloc[0] if cp["iso3"].notna().any() else None
         info = cp.iloc[0]
+        # 国旗（flagcdn.com の画像）と国名。複数国向けの区分には国旗を出さない
+        code = info.get("wb_country_code")
+        flag = (f'<img src="https://flagcdn.com/h40/{FLAG_CODE.get(code, code).lower()}.png" alt="" '
+                f'style="height:36px;border:1px solid #d3d2cc;border-radius:3px;margin-right:12px;'
+                f'vertical-align:middle">' if iso3 and isinstance(code, str) and len(code) == 2 else "")
+        st.markdown(f'<div style="display:flex;align-items:center;margin:4px 0 8px 0">{flag}'
+                    f'<span style="font-size:1.8rem;font-weight:700">{country}</span></div>',
+                    unsafe_allow_html=True)
         st.caption(f"World Bank region: {info.get('wb_region') or '—'} · "
                    f"Income group (current): {info.get('income_level') or '—'} · "
                    f"Lending category: {info.get('lending_type') or '—'} · "
                    f"IFC region: {info.get('ifc_region')} ({info.get('ifc_region_basis') or '—'}) · "
-                   f"OECD country risk: {info.get('oecd_crc_label') if pd.notna(info.get('oecd_crc_label')) else '—'}")
+                   f"OECD country risk: {info.get('oecd_crc_label') if pd.notna(info.get('oecd_crc_label')) else '—'} · "
+                   f"Currency against US\\$: {info.get('fx_depr_5y_label') if pd.notna(info.get('fx_depr_5y_label')) else '—'}")
         tc_ = stage_totals(cf)
         k1, k2, k3 = st.columns(3)
         k1.metric("Active portfolio", fmt_usd(tc_["Active portfolio"][0]) if "Active portfolio" in stages
@@ -1308,14 +1456,25 @@ with tab_notes:
   its use for other purposes. High-income OECD and euro-area countries are not classified. Multi-country projects
   appear as *No data*.
 
+**Currency risk**
+- The source data does not record the currency of each investment. Currency risk is therefore shown at country
+  level: the average annual change of the country's currency against the US dollar over the last five years, from
+  the World Bank's official exchange rates (annual averages, indicator PA.NUS.FCRF). Positive values mean the local
+  currency weakened. Euro-area and dollarised economies show little or no change against the dollar.
+- Most IFC loans are in US dollars, so currency weakness mainly reaches IFC through its clients' ability to repay;
+  local-currency loans and equity are exposed directly. Official rates can differ from market rates where
+  exchange controls apply.
+
 **Comparison with the EBRD**
 - EBRD figures come from the EBRD's list of investments since 1991 and its project list (ebrd.com). They are
   *net cumulative investment*: commitments after cancellations and sales, including later increases, dated by
   the year the operation was first signed, in euros at month-end reported rates.
 - IFC figures are Board-approved amounts by approval fiscal year (July–June), in US dollars. One EUR/USD rate,
-  set on the tab, converts EBRD amounts. Read the comparison as orders of magnitude and shares.
-- IFC invests only in the private sector; the EBRD also lends to the public sector. The tab shows EBRD
-  private-sector operations by default.
+  converts EBRD amounts: the ECB euro reference rate on the EBRD data's as-of date (1.1750 US\\$ per euro on
+  31 December 2025), consistent with the month-end rates the EBRD uses. Read the comparison as orders of
+  magnitude and shares.
+- IFC invests only in the private sector; the EBRD also lends to the public sector. The tab compares EBRD
+  private-sector operations; EBRD public-sector lending is shown separately as the EBRD's public-sector share.
 - Business lines are matched to EBRD sectors approximately: FIG → financial institutions; INF → sustainable
   infrastructure; MAS → corporate sectors excluding equity funds; Funds & Tech → equity funds. Other business
   lines are compared with all EBRD sectors.

@@ -32,7 +32,8 @@ THRESHOLDS_NOTE = """
   country* from 50%, *led by one country* from 30%; country risk — *elevated* if the amount-weighted OECD category
   is 5 or more, *moderate* from 3; shares — *large* from 40%, *meaningful* from 15%; IFC vs EBRD — *similar
   size* if IFC has 45–55% of the two, *larger* beyond that, *clearly larger* beyond 75% (or below 25%);
-  a change in mix is mentioned when it is 10 percentage points or more.
+  a change in mix is mentioned when it is 10 percentage points or more; currency risk counts countries whose
+  currency fell by 5% or more a year against the US dollar over five years.
 """
 
 
@@ -173,6 +174,10 @@ def risk(f: dict) -> list[str]:
              f"projects approved ten or more fiscal years ago for {pct(f['old'])}",
              f"{usd(f['undisb'])} is signed but not yet disbursed"]
     p4 = "Among other characteristics, " + listing(chars) + "."
+    if f.get("fx_high") is not None:
+        p4 += (f" Currency risk: {pct(f['fx_high'])} of the amount is in countries whose currency fell by 5% or more a "
+               "year against the US dollar over the last five years"
+               + (f", mainly {listing(f['fx_countries'])}." if f["fx_countries"] else "."))
     if f.get("watch") is not None:
         p4 += (f" On the trial watchlist, {f['watch']} of {f['n']} projects carry two or more risk signals.")
     return [p1, p2, p3, p4]
@@ -184,7 +189,7 @@ def ebrd(f: dict) -> list[str]:
     share = f["ifc"] / (f["ifc"] + f["ebrd"]) if f["ifc"] + f["ebrd"] else 0
     p1 = (f"In the {plural(f['n_countries'], 'country')} where both invested in {f['years'][0]}–{f['years'][1]}, "
           f"{f['ifc_label']} committed **{usd(f['ifc'])}** and {f['ebrd_label']} **{usd(f['ebrd'])}** "
-          f"(converted at {f['rate']:.2f} US$ per euro). IFC accounts for **{pct(share)}** of the two: "
+          f"(converted at {f['rate']:.4f} US$ per euro). IFC accounts for **{pct(share)}** of the two: "
           f"{level(share, PRESENCE)}.")
     p2 = ""
     if f["ifc_larger"] or f["ebrd_larger"]:

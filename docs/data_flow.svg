@@ -1,157 +1,327 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 650" width="100%" font-family="Helvetica, Arial, sans-serif" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpiZDYwZWJhZC1kNDBmLTQ5M2MtYjFlNC0zMDg0ZjVlMzQzYjMAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaCWvvvd973FDRXoZuQBlB6wAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpmNGFiNWE4ZC1lM2EyLTQ2YjAtYmQzMi01MjRiY2UwNTYzODRscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoJ5Rm2oTtutYDUO+QuyJ4TgAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggTZNhlBC9zgtr1craC1EE5xLkdO3+JbmOCXXZf4Z+7YmkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaMDrXSpV1bpbG4wN9f/u79oAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCDC7xjS3hQYW4nB1CQzS1SBHcWFUH+ukxkvE4zi8eDUPGRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBi2Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmJkNjBlYmFkLWQ0MGYtNDkzYy1iMWU0LTMwODRmNWUzNDNiMy9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjE1ODg1NGZiLWQ5MDYtNDk3OC1iMTBkLWJhZmM0ZDA4YmIyOXJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBNk2GUEL3OC2vVytoLUQTnEuR07f4luY4Jddl/hn7tiaJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggfOJEtcXT2Q2PJc9CYZ4BQgbI4Q7zTeaYjVsniP4R8UiiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggxAGWhlpbFpYgEeqlJxu7tbB3b7rdd4YfCbfv2BjBukN0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQBUPp80NWegDb5VJgMpxr1Zqtqzhm7D3GPQCHtquwWvsL+muoNVhiPLI61t6GTYNCZBmNNVlFBL270ud7gR90qY=</c2pa:manifest></metadata>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1780 1230" width="100%" font-family="Helvetica, Arial, sans-serif" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYTpiYTM1MTdkYy0zOWY5LTRjZTQtYmU4Ni1jZmQ1NDc1NjYyMGQAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaEvab9Up+TUkeNeJGOBCui0AAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDo3ODEyMTQ3ZC01ODEyLTQ3ZmQtYTNhZC03M2ZmNzU1ZGQzMzJscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoMvvyVjMOKHlh0mgU4EyN2gAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggu/HGWxyR2m9d8lCDU2LrxTxuTeeFS1CgDRgs6ElFwf2kZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaBywuyOylPP5Nx1U79aQWKwAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCAR2nV/6JgRGLedavDJWR4Gp1xNP4ppSVBQN7/GBAYrvmRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBi3Zmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOmJhMzUxN2RjLTM5ZjktNGNlNC1iZTg2LWNmZDU0NzU2NjIwZC9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOmZhOGY1MmFkLTQxM2YtNGZlMC1hMDk4LWVlMGVkZTAzYTBmYXJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCC78cZbHJHab13yUINTYuvFPG5N54VLUKANGCzoSUXB/aJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggtYdHxWFdZHWRWUbCCHDL5LYE2uCK0mQ3Tuyq8CBhD++iY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggs05lFQIIyE4/L3+ENAstIvmnYxtuIKZgdXqyDjc8VTF0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQL2ONgQpK7u+HbtavboIafPZYDK0aReknr82ZVFKDAWXYUeEjsT3r1yd8BbnjDSXCv4V4Ao0PU2TlHkiPgFEkDs=</c2pa:manifest></metadata>
 <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8984"/></marker></defs>
-<rect width="1240" height="650" rx="16" fill="#ffffff"/>
-<text x="24" y="40" font-size="22" font-weight="700" fill="#1f1e1b">IFC Portfolio Explorer — how the data flows</text>
-<text x="24" y="64" font-size="13" fill="#6b6a65">Five public sources are processed into one database. The dashboard reads from it; country codes (ISO3) link everything together.</text>
-<rect x="24" y="84" width="246" height="512" rx="12" fill="#f7f7f5"/>
-<text x="38" y="106" font-size="13" font-weight="700" fill="#5f5e5a">1  Where the data comes from</text>
-<rect x="330" y="84" width="290" height="512" rx="12" fill="#f7f7f5"/>
-<text x="344" y="106" font-size="13" font-weight="700" fill="#5f5e5a">2  How it is processed</text>
-<rect x="680" y="84" width="220" height="512" rx="12" fill="#f7f7f5"/>
-<text x="694" y="106" font-size="13" font-weight="700" fill="#5f5e5a">3  Where it is stored</text>
-<rect x="960" y="84" width="256" height="512" rx="12" fill="#f7f7f5"/>
-<text x="974" y="106" font-size="13" font-weight="700" fill="#5f5e5a">4  What the dashboard shows</text>
-<rect x="34" y="136" width="226" height="74" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-<rect x="34" y="136" width="8" height="74" rx="4" fill="#2a78d6"/>
-<text x="52" y="164.0" font-size="15" font-weight="700" fill="#1f1e1b">IFC investment projects</text>
-<text x="52" y="183.0" font-size="12" fill="#6b6a65">Finances One API (DS00499)</text>
-<text x="52" y="199.0" font-size="12" fill="#6b6a65">~7,100 projects</text>
-<rect x="340" y="136" width="270" height="74" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-<rect x="340" y="136" width="8" height="74" rx="4" fill="#2a78d6"/>
-<text x="358" y="164.0" font-size="15" font-weight="700" fill="#1f1e1b">Clean and classify</text>
-<text x="358" y="183.0" font-size="12" fill="#6b6a65">one row per project · business line · stage ·</text>
-<text x="358" y="199.0" font-size="12" fill="#6b6a65">program-level amounts set aside</text>
-<rect x="690" y="136" width="200" height="74" rx="10" fill="#ffffff" stroke="#2a78d6" stroke-width="2"/>
-<rect x="690" y="136" width="8" height="74" rx="4" fill="#2a78d6"/>
-<text x="708" y="172.0" font-size="15" font-weight="700" fill="#1f1e1b">IFC projects</text>
-<text x="708" y="191.0" font-size="12" fill="#6b6a65">amounts by instrument</text>
-<line x1="262" y1="173.0" x2="338" y2="173.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="612" y1="173.0" x2="688" y2="173.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="892" y1="173.0" x2="968" y2="173.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<rect x="974" y="156.0" width="44" height="34" rx="8" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.5"/>
-<text x="996.0" y="178.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
-<rect x="1022" y="156.0" width="44" height="34" rx="8" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.5"/>
-<text x="1044.0" y="178.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
-<rect x="1070" y="156.0" width="44" height="34" rx="8" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.5"/>
-<text x="1092.0" y="178.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
-<rect x="1118" y="156.0" width="44" height="34" rx="8" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.5"/>
-<text x="1140.0" y="178.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">4</text>
-<rect x="1166" y="156.0" width="44" height="34" rx="8" fill="#2a78d6" stroke="#2a78d6" stroke-width="1.5"/>
-<text x="1188.0" y="178.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">5</text>
-<rect x="34" y="228" width="226" height="74" rx="10" fill="#ffffff" stroke="#4a3aa7" stroke-width="2"/>
-<rect x="34" y="228" width="8" height="74" rx="4" fill="#4a3aa7"/>
-<text x="52" y="264.0" font-size="15" font-weight="700" fill="#1f1e1b">World Bank country data</text>
-<text x="52" y="283.0" font-size="12" fill="#6b6a65">regions, income groups (API)</text>
-<rect x="340" y="228" width="270" height="74" rx="10" fill="#ffffff" stroke="#4a3aa7" stroke-width="2"/>
-<rect x="340" y="228" width="8" height="74" rx="4" fill="#4a3aa7"/>
-<text x="358" y="264.0" font-size="15" font-weight="700" fill="#1f1e1b">Code countries</text>
-<text x="358" y="283.0" font-size="12" fill="#6b6a65">ISO3 country codes · IFC regions</text>
-<rect x="690" y="228" width="200" height="74" rx="10" fill="#ffffff" stroke="#4a3aa7" stroke-width="2"/>
-<rect x="690" y="228" width="8" height="74" rx="4" fill="#4a3aa7"/>
-<text x="708" y="264.0" font-size="15" font-weight="700" fill="#1f1e1b">Countries</text>
-<text x="708" y="283.0" font-size="12" fill="#6b6a65">joined to every project</text>
-<line x1="262" y1="265.0" x2="338" y2="265.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="612" y1="265.0" x2="688" y2="265.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="892" y1="265.0" x2="968" y2="265.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<rect x="974" y="248.0" width="44" height="34" rx="8" fill="#4a3aa7" stroke="#4a3aa7" stroke-width="1.5"/>
-<text x="996.0" y="270.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">1</text>
-<rect x="1022" y="248.0" width="44" height="34" rx="8" fill="#4a3aa7" stroke="#4a3aa7" stroke-width="1.5"/>
-<text x="1044.0" y="270.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">2</text>
-<rect x="1070" y="248.0" width="44" height="34" rx="8" fill="#4a3aa7" stroke="#4a3aa7" stroke-width="1.5"/>
-<text x="1092.0" y="270.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
-<rect x="1118" y="248.0" width="44" height="34" rx="8" fill="#4a3aa7" stroke="#4a3aa7" stroke-width="1.5"/>
-<text x="1140.0" y="270.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">4</text>
-<rect x="1166" y="248.0" width="44" height="34" rx="8" fill="#4a3aa7" stroke="#4a3aa7" stroke-width="1.5"/>
-<text x="1188.0" y="270.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">5</text>
-<rect x="34" y="320" width="226" height="74" rx="10" fill="#ffffff" stroke="#1c5cab" stroke-width="2"/>
-<rect x="34" y="320" width="8" height="74" rx="4" fill="#1c5cab"/>
-<text x="52" y="356.0" font-size="15" font-weight="700" fill="#1f1e1b">OECD country risk</text>
-<text x="52" y="375.0" font-size="12" fill="#6b6a65">classification list (PDF)</text>
-<rect x="340" y="320" width="270" height="74" rx="10" fill="#ffffff" stroke="#1c5cab" stroke-width="2"/>
-<rect x="340" y="320" width="8" height="74" rx="4" fill="#1c5cab"/>
-<text x="358" y="356.0" font-size="15" font-weight="700" fill="#1f1e1b">Read the risk list</text>
-<text x="358" y="375.0" font-size="12" fill="#6b6a65">category 0 (low) – 7 (high) per country</text>
-<rect x="690" y="320" width="200" height="74" rx="10" fill="#ffffff" stroke="#1c5cab" stroke-width="2"/>
-<rect x="690" y="320" width="8" height="74" rx="4" fill="#1c5cab"/>
-<text x="708" y="356.0" font-size="15" font-weight="700" fill="#1f1e1b">Country risk</text>
-<text x="708" y="375.0" font-size="12" fill="#6b6a65">latest category per country</text>
-<line x1="262" y1="357.0" x2="338" y2="357.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="612" y1="357.0" x2="688" y2="357.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="892" y1="357.0" x2="968" y2="357.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<rect x="974" y="340.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="996.0" y="362.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">1</text>
-<rect x="1022" y="340.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="1044.0" y="362.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">2</text>
-<rect x="1070" y="340.0" width="44" height="34" rx="8" fill="#1c5cab" stroke="#1c5cab" stroke-width="1.5"/>
-<text x="1092.0" y="362.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">3</text>
-<rect x="1118" y="340.0" width="44" height="34" rx="8" fill="#1c5cab" stroke="#1c5cab" stroke-width="1.5"/>
-<text x="1140.0" y="362.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">4</text>
-<rect x="1166" y="340.0" width="44" height="34" rx="8" fill="#1c5cab" stroke="#1c5cab" stroke-width="1.5"/>
-<text x="1188.0" y="362.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">5</text>
-<rect x="34" y="412" width="226" height="74" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-<rect x="34" y="412" width="8" height="74" rx="4" fill="#eb6834"/>
-<text x="52" y="448.0" font-size="15" font-weight="700" fill="#1f1e1b">EBRD investments</text>
-<text x="52" y="467.0" font-size="12" fill="#6b6a65">Excel and project list (CSV) · monthly</text>
-<rect x="340" y="412" width="270" height="74" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-<rect x="340" y="412" width="8" height="74" rx="4" fill="#eb6834"/>
-<text x="358" y="440.0" font-size="15" font-weight="700" fill="#1f1e1b">Archive and link</text>
-<text x="358" y="459.0" font-size="12" fill="#6b6a65">dated copies · Excel linked to CSV</text>
-<text x="358" y="475.0" font-size="12" fill="#6b6a65">by project name and country</text>
-<rect x="690" y="412" width="200" height="74" rx="10" fill="#ffffff" stroke="#eb6834" stroke-width="2"/>
-<rect x="690" y="412" width="8" height="74" rx="4" fill="#eb6834"/>
-<text x="708" y="448.0" font-size="15" font-weight="700" fill="#1f1e1b">EBRD operations</text>
-<text x="708" y="467.0" font-size="12" fill="#6b6a65">amounts, sector, status</text>
-<line x1="262" y1="449.0" x2="338" y2="449.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="612" y1="449.0" x2="688" y2="449.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="892" y1="449.0" x2="968" y2="449.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<rect x="974" y="432.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="996.0" y="454.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">1</text>
-<rect x="1022" y="432.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="1044.0" y="454.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">2</text>
-<rect x="1070" y="432.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="1092.0" y="454.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">3</text>
-<rect x="1118" y="432.0" width="44" height="34" rx="8" fill="#eb6834" stroke="#eb6834" stroke-width="1.5"/>
-<text x="1140.0" y="454.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">4</text>
-<rect x="1166" y="432.0" width="44" height="34" rx="8" fill="#eb6834" stroke="#eb6834" stroke-width="1.5"/>
-<text x="1188.0" y="454.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">5</text>
-<rect x="34" y="504" width="226" height="74" rx="10" fill="#ffffff" stroke="#1baf7a" stroke-width="2"/>
-<rect x="34" y="504" width="8" height="74" rx="4" fill="#1baf7a"/>
-<text x="52" y="540.0" font-size="15" font-weight="700" fill="#1f1e1b">IFC reports</text>
-<text x="52" y="559.0" font-size="12" fill="#6b6a65">country studies (PDF)</text>
-<rect x="340" y="504" width="270" height="74" rx="10" fill="#ffffff" stroke="#1baf7a" stroke-width="2"/>
-<rect x="340" y="504" width="8" height="74" rx="4" fill="#1baf7a"/>
-<text x="358" y="532.0" font-size="15" font-weight="700" fill="#1f1e1b">Extract and tag text</text>
-<text x="358" y="551.0" font-size="12" fill="#6b6a65">paragraphs, boilerplate removed ·</text>
-<text x="358" y="567.0" font-size="12" fill="#6b6a65">country, industry and theme tags</text>
-<rect x="690" y="504" width="200" height="74" rx="10" fill="#ffffff" stroke="#1baf7a" stroke-width="2"/>
-<rect x="690" y="504" width="8" height="74" rx="4" fill="#1baf7a"/>
-<text x="708" y="540.0" font-size="15" font-weight="700" fill="#1f1e1b">Report paragraphs</text>
-<text x="708" y="559.0" font-size="12" fill="#6b6a65">with page numbers</text>
-<line x1="262" y1="541.0" x2="338" y2="541.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="612" y1="541.0" x2="688" y2="541.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<line x1="892" y1="541.0" x2="968" y2="541.0" stroke="#8a8984" stroke-width="2" marker-end="url(#ar)"/>
-<rect x="974" y="524.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="996.0" y="546.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">1</text>
-<rect x="1022" y="524.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="1044.0" y="546.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">2</text>
-<rect x="1070" y="524.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="1092.0" y="546.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">3</text>
-<rect x="1118" y="524.0" width="44" height="34" rx="8" fill="#ffffff" stroke="#d3d2cc" stroke-width="1.5"/>
-<text x="1140.0" y="546.0" font-size="14" font-weight="700" text-anchor="middle" fill="#c3c2b7">4</text>
-<rect x="1166" y="524.0" width="44" height="34" rx="8" fill="#1baf7a" stroke="#1baf7a" stroke-width="1.5"/>
-<text x="1188.0" y="546.0" font-size="14" font-weight="700" text-anchor="middle" fill="#ffffff">5</text>
-<rect x="684" y="130" width="212" height="454" rx="12" fill="none" stroke="#1baf7a" stroke-width="1.5" stroke-dasharray="6 4"/>
-<text x="996" y="128" font-size="10.5" text-anchor="middle" fill="#5f5e5a">Overview</text>
-<text x="1044" y="128" font-size="10.5" text-anchor="middle" fill="#5f5e5a">Portfolio</text>
-<text x="1092" y="128" font-size="10.5" text-anchor="middle" fill="#5f5e5a">Risk</text>
-<text x="1140" y="128" font-size="10.5" text-anchor="middle" fill="#5f5e5a">vs EBRD</text>
-<text x="1188" y="128" font-size="10.5" text-anchor="middle" fill="#5f5e5a">Country</text>
-<text x="974" y="606" font-size="12" fill="#4a3aa7">Coloured = the tab uses this data</text>
-<text x="974" y="624" font-size="12" fill="#4a3aa7">(Streamlit app, app/app.py)</text>
-<text x="694" y="606" font-size="12" fill="#0f7a52">One database file (DuckDB),</text>
-<text x="694" y="624" font-size="12" fill="#0f7a52">rebuilt by re-running the scripts</text>
-<text x="344" y="606" font-size="12" fill="#b4501d">Python scripts in src/, using</text>
-<text x="344" y="624" font-size="12" fill="#b4501d">hand-edited reference tables in sources/</text>
-<text x="38" y="606" font-size="12" fill="#1c5cab">All sources are public and free;</text>
-<text x="38" y="624" font-size="12" fill="#1c5cab">raw files are kept with their date</text>
+<rect x="0" y="0" width="1780" height="1230" rx="16" fill="#ffffff" stroke="#ffffff" stroke-width="1.5"/>
+<text x="24" y="38" font-size="22" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">IFC Portfolio Explorer — data pipeline and database schema</text>
+<text x="24" y="62" font-size="13" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">Raw files are processed by the scripts in src/ into one DuckDB database (data/curated/ifc.duckdb). Solid boxes are tables, dashed boxes are views. Arrows join a PK or K column to the FK column of the next table.</text>
+<rect x="20" y="80" width="250" height="1130" rx="12" fill="#f7f7f5" stroke="#f7f7f5" stroke-width="1.5"/>
+<text x="32" y="102" font-size="13" font-weight="700" fill="#5f5e5a" text-anchor="start" font-family="Helvetica, Arial, sans-serif">1  Raw files (data/raw/, sources/)</text>
+<rect x="290" y="80" width="290" height="1130" rx="12" fill="#f7f7f5" stroke="#f7f7f5" stroke-width="1.5"/>
+<text x="302" y="102" font-size="13" font-weight="700" fill="#5f5e5a" text-anchor="start" font-family="Helvetica, Arial, sans-serif">2  Scripts (src/) and processing</text>
+<rect x="610" y="80" width="850" height="1130" rx="12" fill="#f7f7f5" stroke="#f7f7f5" stroke-width="1.5"/>
+<text x="622" y="102" font-size="13" font-weight="700" fill="#5f5e5a" text-anchor="start" font-family="Helvetica, Arial, sans-serif">3  Database: tables and views</text>
+<rect x="1470" y="80" width="290" height="1130" rx="12" fill="#f7f7f5" stroke="#f7f7f5" stroke-width="1.5"/>
+<text x="1482" y="102" font-size="13" font-weight="700" fill="#5f5e5a" text-anchor="start" font-family="Helvetica, Arial, sans-serif">4  Consumers</text>
+<rect x="30" y="120" width="235" height="58" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="1.5"/>
+<rect x="30" y="120" width="6" height="58" rx="3" fill="#2a78d6"/>
+<text x="44" y="138" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">IFC projects</text>
+<text x="44" y="155" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">Finances One API (DS00499)</text>
+<text x="44" y="170" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">structured/ifc_projects_*.json</text>
+<rect x="30" y="360" width="235" height="58" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5"/>
+<rect x="30" y="360" width="6" height="58" rx="3" fill="#4a3aa7"/>
+<text x="44" y="378" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">World Bank countries</text>
+<text x="44" y="395" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">country API</text>
+<text x="44" y="410" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">structured/wb_countries_*.json</text>
+<rect x="30" y="440" width="235" height="43" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5"/>
+<rect x="30" y="440" width="6" height="43" rx="3" fill="#4a3aa7"/>
+<text x="44" y="458" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">OECD country risk (PDF)</text>
+<text x="44" y="475" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">country/oecd_crc_*.pdf</text>
+<rect x="30" y="500" width="235" height="58" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5"/>
+<rect x="30" y="500" width="6" height="58" rx="3" fill="#4a3aa7"/>
+<text x="44" y="518" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">World Bank exchange rates</text>
+<text x="44" y="535" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">PA.NUS.FCRF</text>
+<text x="44" y="550" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">country/wb_fx_*.json</text>
+<rect x="30" y="650" width="235" height="58" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="30" y="650" width="6" height="58" rx="3" fill="#eb6834"/>
+<text x="44" y="668" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">EBRD investments + project list</text>
+<text x="44" y="685" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">Excel (List sheet) and CSV, monthly</text>
+<text x="44" y="700" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">ebrd/inbox/ → ebrd/*_YYYYMMDD.*</text>
+<rect x="30" y="920" width="235" height="43" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.5"/>
+<rect x="30" y="920" width="6" height="43" rx="3" fill="#1baf7a"/>
+<text x="44" y="938" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">IFC reports (PDF)</text>
+<text x="44" y="955" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">pdf/*.pdf</text>
+<rect x="30" y="1060" width="235" height="88" rx="8" fill="#ffffff" stroke="#a8a7a2" stroke-width="1.5"/>
+<rect x="30" y="1060" width="6" height="88" rx="3" fill="#a8a7a2"/>
+<text x="44" y="1078" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Helvetica, Arial, sans-serif">Reference tables (hand-edited)</text>
+<text x="44" y="1095" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">sources/*.csv: amount overrides,</text>
+<text x="44" y="1110" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">business-line rules, IFC regions,</text>
+<text x="44" y="1125" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">country aliases, report list,</text>
+<text x="44" y="1140" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tag dictionary</text>
+<rect x="300" y="120" width="270" height="148" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="1.5"/>
+<rect x="300" y="120" width="6" height="148" rx="3" fill="#2a78d6"/>
+<text x="314" y="138" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">fetch_projects.py</text>
+<text x="314" y="155" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">page through the API (1,000 per call)</text>
+<text x="314" y="170" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">clean text, dates and amounts</text>
+<text x="314" y="185" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">business line from department name</text>
+<text x="314" y="200" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">stage from status (active / completed /</text>
+<text x="314" y="215" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">  pipeline / on hold)</text>
+<text x="314" y="230" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">flag program-level amounts (GTFP,</text>
+<text x="314" y="245" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">  same amount on the same day)</text>
+<text x="314" y="260" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">split amounts by instrument</text>
+<rect x="300" y="360" width="270" height="73" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5"/>
+<rect x="300" y="360" width="6" height="73" rx="3" fill="#4a3aa7"/>
+<text x="314" y="378" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">build_country_ref.py</text>
+<text x="314" y="395" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">match country names → ISO3</text>
+<text x="314" y="410" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">World Bank region, income group</text>
+<text x="314" y="425" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">IFC region and its basis</text>
+<rect x="300" y="450" width="270" height="88" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5"/>
+<rect x="300" y="450" width="6" height="88" rx="3" fill="#4a3aa7"/>
+<text x="314" y="468" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">fetch_country_data.py</text>
+<text x="314" y="485" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">OECD category 0–7 per country</text>
+<text x="314" y="500" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">FX: 5-year average annual</text>
+<text x="314" y="515" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">  depreciation, 10-year volatility</text>
+<text x="314" y="530" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">keep history by as-of date</text>
+<rect x="300" y="640" width="270" height="118" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="300" y="640" width="6" height="118" rx="3" fill="#eb6834"/>
+<text x="314" y="658" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">build_ebrd.py</text>
+<text x="314" y="675" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">detect file type, archive with date</text>
+<text x="314" y="690" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">Excel rows: operation × country</text>
+<text x="314" y="705" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">split debt / equity / guarantee</text>
+<text x="314" y="720" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">link to CSV project by normalised</text>
+<text x="314" y="735" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">  name + country</text>
+<text x="314" y="750" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">status history from all CSVs</text>
+<rect x="300" y="900" width="270" height="103" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.5"/>
+<rect x="300" y="900" width="6" height="103" rx="3" fill="#1baf7a"/>
+<text x="314" y="918" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">extract_pdfs.py → tag_blocks.py</text>
+<text x="314" y="935" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">text blocks with page and position</text>
+<text x="314" y="950" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">classify: paragraph, caption, toc,</text>
+<text x="314" y="965" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">  reference, note, table, boilerplate</text>
+<text x="314" y="980" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tags: country, industry, theme</text>
+<text x="314" y="995" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">  (keyword dictionary)</text>
+<path d="M265,149.0 H282.5 V194.0 H300" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M265,389.0 H282.5 V396.5 H300" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M265,461.5 H282.5 V482.0 H300" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M265,529.0 H282.5 V506.0 H300" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M265,679.0 H282.5 V699.0 H300" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M265,941.5 H282.5 V951.5 H300" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M265,1074 H282.5 V258 H300" fill="none" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<path d="M265,1074 H282.5 V423 H300" fill="none" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<path d="M265,1074 H282.5 V993 H300" fill="none" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<rect x="620" y="120" width="245" height="176" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="1.5"/>
+<rect x="621" y="121" width="243" height="23" rx="7" fill="#2a78d6" opacity="0.16"/>
+<text x="630" y="137" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">projects</text>
+<text x="857" y="137" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="630" y="160" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="652" y="160" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_number</text>
+<text x="652" y="176" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">document_type</text>
+<text x="630" y="192" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="652" y="192" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">country</text>
+<text x="652" y="208" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">business_line</text>
+<text x="652" y="224" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">portfolio_stage</text>
+<text x="652" y="240" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">board_fy</text>
+<text x="652" y="256" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">amount_basis</text>
+<text x="652" y="272" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">approved_usd_m_for_sum</text>
+<text x="630" y="288" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">one row per disclosure document</text>
+<rect x="905" y="120" width="245" height="96" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="1.5"/>
+<rect x="906" y="121" width="243" height="23" rx="7" fill="#2a78d6" opacity="0.16"/>
+<text x="915" y="137" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_instruments</text>
+<text x="1142" y="137" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="915" y="160" font-size="9" font-weight="700" fill="#b4501d" text-anchor="start" font-family="Menlo, Consolas, monospace">FK</text>
+<text x="937" y="160" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_number</text>
+<text x="937" y="176" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">instrument</text>
+<text x="937" y="192" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">approved_usd_m</text>
+<text x="937" y="208" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">approved_usd_m_for_sum</text>
+<rect x="1190" y="120" width="235" height="64" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="1.5" stroke-dasharray="5 3"/>
+<rect x="1191" y="121" width="233" height="23" rx="7" fill="#2a78d6" opacity="0.1"/>
+<text x="1200" y="137" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">projects_unique</text>
+<text x="1417" y="137" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">view</text>
+<text x="1200" y="160" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="1222" y="160" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_number</text>
+<text x="1200" y="176" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">2012-policy document preferred</text>
+<rect x="1190" y="215" width="235" height="112" rx="8" fill="#ffffff" stroke="#2a78d6" stroke-width="1.5" stroke-dasharray="5 3"/>
+<rect x="1191" y="216" width="233" height="23" rx="7" fill="#2a78d6" opacity="0.1"/>
+<text x="1200" y="232" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">projects_enriched</text>
+<text x="1417" y="232" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">view</text>
+<text x="1200" y="255" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="1222" y="255" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_number</text>
+<text x="1200" y="271" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="1222" y="271" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">iso3</text>
+<text x="1222" y="287" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ifc_region</text>
+<text x="1222" y="303" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">income_level</text>
+<text x="1200" y="319" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">projects_unique + countries</text>
+<rect x="620" y="360" width="245" height="112" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5"/>
+<rect x="621" y="361" width="243" height="23" rx="7" fill="#4a3aa7" opacity="0.16"/>
+<text x="630" y="377" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">countries</text>
+<text x="857" y="377" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="630" y="400" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="652" y="400" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">country</text>
+<text x="630" y="416" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="652" y="416" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">iso3</text>
+<text x="652" y="432" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">wb_region</text>
+<text x="652" y="448" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">income_level</text>
+<text x="652" y="464" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ifc_region</text>
+<rect x="905" y="440" width="245" height="112" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5"/>
+<rect x="906" y="441" width="243" height="23" rx="7" fill="#4a3aa7" opacity="0.16"/>
+<text x="915" y="457" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">country_indicators</text>
+<text x="1142" y="457" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="915" y="480" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="937" y="480" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">iso3</text>
+<text x="937" y="496" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">indicator</text>
+<text x="937" y="512" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">value</text>
+<text x="937" y="528" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">as_of</text>
+<text x="915" y="544" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">oecd_crc, fx_depr_5y, fx_vol_10y</text>
+<rect x="1190" y="440" width="235" height="112" rx="8" fill="#ffffff" stroke="#4a3aa7" stroke-width="1.5" stroke-dasharray="5 3"/>
+<rect x="1191" y="441" width="233" height="23" rx="7" fill="#4a3aa7" opacity="0.1"/>
+<text x="1200" y="457" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">country_risk</text>
+<text x="1417" y="457" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">view</text>
+<text x="1200" y="480" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="1222" y="480" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">iso3</text>
+<text x="1222" y="496" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">oecd_crc</text>
+<text x="1222" y="512" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">fx_depr_5y</text>
+<text x="1222" y="528" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">fx_vol_10y</text>
+<text x="1200" y="544" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">latest value per indicator</text>
+<rect x="620" y="620" width="245" height="160" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="621" y="621" width="243" height="23" rx="7" fill="#eb6834" opacity="0.16"/>
+<text x="630" y="637" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ebrd_operations</text>
+<text x="857" y="637" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="630" y="660" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="652" y="660" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">operation_key</text>
+<text x="630" y="676" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="652" y="676" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">iso3</text>
+<text x="652" y="692" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">sector_group</text>
+<text x="652" y="708" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">portfolio_class</text>
+<text x="652" y="724" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">signing_year</text>
+<text x="652" y="740" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ebrd_finance_eur_m</text>
+<text x="630" y="756" font-size="9" font-weight="700" fill="#b4501d" text-anchor="start" font-family="Menlo, Consolas, monospace">FK</text>
+<text x="652" y="756" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_id</text>
+<text x="630" y="772" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">one row per operation × country</text>
+<rect x="905" y="620" width="245" height="80" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="906" y="621" width="243" height="23" rx="7" fill="#eb6834" opacity="0.16"/>
+<text x="915" y="637" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ebrd_operation_instruments</text>
+<text x="915" y="660" font-size="9" font-weight="700" fill="#b4501d" text-anchor="start" font-family="Menlo, Consolas, monospace">FK</text>
+<text x="937" y="660" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">operation_key</text>
+<text x="937" y="676" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">instrument</text>
+<text x="937" y="692" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">amount_eur_m</text>
+<rect x="905" y="735" width="245" height="96" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="906" y="736" width="243" height="23" rx="7" fill="#eb6834" opacity="0.16"/>
+<text x="915" y="752" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ebrd_projects</text>
+<text x="1142" y="752" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="915" y="775" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="937" y="775" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_id</text>
+<text x="937" y="791" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">status</text>
+<text x="937" y="807" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">stage</text>
+<text x="915" y="823" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="937" y="823" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">iso3</text>
+<rect x="1190" y="620" width="235" height="80" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="1.5"/>
+<rect x="1191" y="621" width="233" height="23" rx="7" fill="#eb6834" opacity="0.16"/>
+<text x="1200" y="637" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ebrd_project_status_history</text>
+<text x="1200" y="660" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="1222" y="660" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">snapshot_date</text>
+<text x="1200" y="676" font-size="9" font-weight="700" fill="#b4501d" text-anchor="start" font-family="Menlo, Consolas, monospace">FK</text>
+<text x="1222" y="676" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_id</text>
+<text x="1222" y="692" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">status</text>
+<rect x="1190" y="735" width="235" height="64" rx="8" fill="#ffffff" stroke="#eb6834" stroke-width="1.5" stroke-dasharray="5 3"/>
+<rect x="1191" y="736" width="233" height="23" rx="7" fill="#eb6834" opacity="0.1"/>
+<text x="1200" y="752" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">ebrd_status_changes</text>
+<text x="1417" y="752" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">view</text>
+<text x="1200" y="775" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="1222" y="775" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">project_id</text>
+<text x="1200" y="791" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">status changed since last download</text>
+<rect x="620" y="880" width="245" height="80" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.5"/>
+<rect x="621" y="881" width="243" height="23" rx="7" fill="#1baf7a" opacity="0.16"/>
+<text x="630" y="897" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">documents</text>
+<text x="857" y="897" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="630" y="920" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="652" y="920" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_id</text>
+<text x="652" y="936" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">title</text>
+<text x="652" y="952" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">pub_date</text>
+<rect x="620" y="995" width="245" height="96" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.5"/>
+<rect x="621" y="996" width="243" height="23" rx="7" fill="#1baf7a" opacity="0.16"/>
+<text x="630" y="1012" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_blocks</text>
+<text x="857" y="1012" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="630" y="1035" font-size="9" font-weight="700" fill="#b4501d" text-anchor="start" font-family="Menlo, Consolas, monospace">FK</text>
+<text x="652" y="1035" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_id</text>
+<text x="630" y="1051" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="652" y="1051" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">page, block_no</text>
+<text x="652" y="1067" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">kind</text>
+<text x="652" y="1083" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">text</text>
+<rect x="905" y="880" width="245" height="64" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.5"/>
+<rect x="906" y="881" width="243" height="23" rx="7" fill="#1baf7a" opacity="0.16"/>
+<text x="915" y="897" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_countries</text>
+<text x="1142" y="897" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="915" y="920" font-size="9" font-weight="700" fill="#b4501d" text-anchor="start" font-family="Menlo, Consolas, monospace">FK</text>
+<text x="937" y="920" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_id</text>
+<text x="915" y="936" font-size="9" font-weight="700" fill="#4a3aa7" text-anchor="start" font-family="Menlo, Consolas, monospace">K</text>
+<text x="937" y="936" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">iso3</text>
+<rect x="905" y="995" width="245" height="80" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.5"/>
+<rect x="906" y="996" width="243" height="23" rx="7" fill="#1baf7a" opacity="0.16"/>
+<text x="915" y="1012" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">block_tags</text>
+<text x="1142" y="1012" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">table</text>
+<text x="915" y="1035" font-size="9" font-weight="700" fill="#b4501d" text-anchor="start" font-family="Menlo, Consolas, monospace">FK</text>
+<text x="937" y="1035" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_id, page, block_no</text>
+<text x="937" y="1051" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">tag_type</text>
+<text x="937" y="1067" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">tag</text>
+<rect x="1190" y="960" width="235" height="96" rx="8" fill="#ffffff" stroke="#1baf7a" stroke-width="1.5" stroke-dasharray="5 3"/>
+<rect x="1191" y="961" width="233" height="23" rx="7" fill="#1baf7a" opacity="0.1"/>
+<text x="1200" y="977" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">evidence</text>
+<text x="1417" y="977" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="end" font-family="Helvetica, Arial, sans-serif">view</text>
+<text x="1200" y="1000" font-size="9" font-weight="700" fill="#0f7a52" text-anchor="start" font-family="Menlo, Consolas, monospace">PK</text>
+<text x="1222" y="1000" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_id, page, block_no</text>
+<text x="1222" y="1016" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">sectors, themes</text>
+<text x="1222" y="1032" font-size="11" font-weight="400" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">countries_mentioned</text>
+<text x="1200" y="1048" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">paragraphs with their tags</text>
+<path d="M570,194.0 H595.0 V208.0 H620" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M570,396.5 H595.0 V416.0 H620" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M570,494.0 H737.5 V496.0 H905" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M570,699.0 H595.0 V700.0 H620" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M570,951.5 H595.0 V920.0 H620" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="865" y1="156" x2="905" y2="156" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="1150" y1="132" x2="1190" y2="132" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<line x1="1305" y1="184" x2="1305" y2="215" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<path d="M865,396 H1027.5 V283 H1190" fill="none" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<line x1="1150" y1="476" x2="1190" y2="476" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<line x1="865" y1="656" x2="905" y2="656" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M865,752 H885.0 V771 H905" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M1150,771 H1170.0 V672 H1190" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="1305" y1="700" x2="1305" y2="735" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<line x1="737" y1="960" x2="737" y2="995" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="744" y="989" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Menlo, Consolas, monospace">doc_id</text>
+<line x1="865" y1="916" x2="905" y2="916" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M865,1047 H885.0 V1031 H905" fill="none" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<path d="M1150,1035.0 H1170.0 V1018.0 H1190" fill="none" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<path d="M1150,912.0 H1170.0 V974 H1190" fill="none" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+<line x1="1440" y1="267" x2="1440" y2="932" stroke="#4a3aa7" stroke-width="2" stroke-dasharray="2 4"/>
+<line x1="1425" y1="267" x2="1440" y2="267" stroke="#4a3aa7" stroke-width="1.2" stroke-dasharray="2 4"/>
+<line x1="1425" y1="476" x2="1440" y2="476" stroke="#4a3aa7" stroke-width="1.2" stroke-dasharray="2 4"/>
+<line x1="1150" y1="819" x2="1440" y2="819" stroke="#4a3aa7" stroke-width="1.2" stroke-dasharray="2 4"/>
+<line x1="1150" y1="932" x2="1440" y2="932" stroke="#4a3aa7" stroke-width="1.2" stroke-dasharray="2 4"/>
+<line x1="865" y1="672" x2="901" y2="672" stroke="#4a3aa7" stroke-width="1.2" stroke-dasharray="2 4"/>
+<text x="1432" y="599.5" font-size="11" fill="#4a3aa7" font-family="Menlo, Consolas, monospace" text-anchor="middle" transform="rotate(-90 1432 599.5)">iso3 — joined in the app (pandas merge)</text>
+<rect x="1480" y="120" width="280" height="178" rx="8" fill="#ffffff" stroke="#5f5e5a" stroke-width="1.5"/>
+<rect x="1480" y="120" width="6" height="178" rx="3" fill="#5f5e5a"/>
+<text x="1494" y="138" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">app/app.py (Streamlit)</text>
+<text x="1494" y="155" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">reads projects_enriched, project_instruments,</text>
+<text x="1494" y="170" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">country_risk, ebrd_operations (+ instruments),</text>
+<text x="1494" y="185" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">evidence, doc_countries, documents</text>
+<text x="1494" y="200" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif"></text>
+<text x="1494" y="215" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tab 1  IFC Overview</text>
+<text x="1494" y="230" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tab 2  Portfolio Profile</text>
+<text x="1494" y="245" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tab 3  Risk Profile</text>
+<text x="1494" y="260" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tab 4  vs EBRD</text>
+<text x="1494" y="275" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tab 5  Country Profile</text>
+<text x="1494" y="290" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">notes  definitions, this diagram</text>
+<rect x="1480" y="330" width="280" height="58" rx="8" fill="#ffffff" stroke="#5f5e5a" stroke-width="1.5"/>
+<rect x="1480" y="330" width="6" height="58" rx="3" fill="#5f5e5a"/>
+<text x="1494" y="348" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">app/summaries.py</text>
+<text x="1494" y="365" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">rule-based summary per tab</text>
+<text x="1494" y="380" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">fixed thresholds, no AI</text>
+<rect x="1480" y="400" width="280" height="43" rx="8" fill="#ffffff" stroke="#5f5e5a" stroke-width="1.5"/>
+<rect x="1480" y="400" width="6" height="43" rx="3" fill="#5f5e5a"/>
+<text x="1494" y="418" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">app/watchlist.py (trial)</text>
+<text x="1494" y="435" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">risk signals per active project</text>
+<rect x="1480" y="455" width="280" height="88" rx="8" fill="#ffffff" stroke="#5f5e5a" stroke-width="1.5"/>
+<rect x="1480" y="455" width="6" height="88" rx="3" fill="#5f5e5a"/>
+<text x="1494" y="473" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">app/commentary.py</text>
+<text x="1494" y="490" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">local only: summary + figures →</text>
+<text x="1494" y="505" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">Claude API → reviewed draft →</text>
+<text x="1494" y="520" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">content/commentary/&lt;tab&gt;.json</text>
+<text x="1494" y="535" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">dashboard shows the saved text</text>
+<rect x="1480" y="640" width="280" height="58" rx="8" fill="#ffffff" stroke="#5f5e5a" stroke-width="1.5"/>
+<rect x="1480" y="640" width="6" height="58" rx="3" fill="#5f5e5a"/>
+<text x="1494" y="658" font-size="12" font-weight="700" fill="#1f1e1b" text-anchor="start" font-family="Menlo, Consolas, monospace">src/export_powerbi.py</text>
+<text x="1494" y="675" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">tables → data/curated/powerbi/*.parquet</text>
+<text x="1494" y="690" font-size="10.5" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">star schema for Power BI (optional)</text>
+<line x1="1440" y1="251.0" x2="1480" y2="251.0" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<text x="1446" y="243.0" font-size="10" font-weight="400" fill="#6b6a65" text-anchor="start" font-family="Helvetica, Arial, sans-serif">read-only</text>
+<line x1="1620" y1="298" x2="1620" y2="330" stroke="#8a8984" stroke-width="1.5" marker-end="url(#ar)"/>
+<line x1="1440" y1="669.0" x2="1480" y2="669.0" stroke="#8a8984" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
 </svg>

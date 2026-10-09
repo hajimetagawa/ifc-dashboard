@@ -24,7 +24,7 @@ All tools and data sources are free. No paid AI or cloud services are used.
 
 ## Data flow
 
-![How the data flows: five public sources are processed by the scripts in src/ into one DuckDB database, which the dashboard tabs read](docs/data_flow.svg)
+![Data pipeline and database schema: raw files, the scripts that process them, the tables and views with their keys, and the components that read them](docs/data_flow.svg)
 
 Each source is processed by a script in `src/` into one DuckDB database, which the dashboard reads; ISO3 country
 codes link IFC projects, country risk, EBRD operations and report text. The same picture is shown on the
@@ -35,7 +35,7 @@ dashboard's *Notes on the data* tab. To change it, edit `docs/make_data_flow.py`
 |---|---|---|
 | IFC investment projects | `src/fetch_projects.py` | One row per project; program-level amounts set aside; business line from department; stage from status |
 | World Bank country data | `src/build_country_ref.py` | ISO3 country codes; World Bank and IFC regions |
-| OECD country risk | `src/fetch_country_data.py` | OECD category (0–7) per country |
+| OECD country risk and exchange rates | `src/fetch_country_data.py` | OECD category (0–7) per country; from World Bank official exchange rates, 5-year average annual depreciation against the US$ and 10-year volatility |
 | EBRD investments | `src/build_ebrd.py` | Files archived by date; Excel operations linked to the CSV project list by name and country |
 | IFC reports | `src/extract_pdfs.py` → `src/tag_blocks.py` | Paragraphs with page numbers, boilerplate removed; country, industry and theme tags |
 | Power BI (optional) | `src/export_powerbi.py` | Parquet files for Power BI |
@@ -47,7 +47,7 @@ dashboard's *Notes on the data* tab. To change it, edit `docs/make_data_flow.py`
 | 1 IFC Overview | `projects_enriched`, `project_instruments` | Whole of IFC. Active portfolio and pipeline now; new commitments by approval fiscal year (signed projects). |
 | 2 Portfolio Profile | `projects_enriched`, `project_instruments` | Scope, fiscal years and stages from the sidebar. Approved amounts (US$m) by approval fiscal year. |
 | 3 Risk Profile | `projects_enriched`, `project_instruments`, `country_risk` | Scope from the sidebar; all active projects. Approved amounts; OECD category of the project's country. |
-| 4 vs EBRD | `projects_enriched`, `project_instruments`, `ebrd_operations`, `ebrd_operation_instruments`, `country_risk` | IFC signed projects by approval fiscal year (US$) vs EBRD net cumulative investment by year of first signing (€, converted at a rate set on the tab). Countries where both invested; IFC multi-country projects left out, EBRD regional operations included through the EBRD's own country allocation. |
+| 4 vs EBRD | `projects_enriched`, `project_instruments`, `ebrd_operations`, `ebrd_operation_instruments`, `country_risk` | IFC signed projects by approval fiscal year (US$) vs EBRD net cumulative investment by year of first signing (€, converted at the ECB reference rate on the EBRD data date). Countries where both invested; IFC multi-country projects left out, EBRD regional operations included through the EBRD's own country allocation. |
 | 5 Country Profile | `projects_enriched`, `project_instruments`, `country_risk`, `ebrd_operations`, `evidence` | One country; IFC figures follow the sidebar. EBRD investment in the same country; report paragraphs by theme. |
 
 ### How often each source is updated
@@ -56,7 +56,8 @@ dashboard's *Notes on the data* tab. To change it, edit `docs/make_data_flow.py`
 |---|---|---|
 | IFC investment projects | Whenever needed | `fetch_projects.py`, then `build_country_ref.py` |
 | World Bank country classification | Once a year (July) | `build_country_ref.py` |
-| OECD country risk classification | After each OECD review (several times a year) | `fetch_country_data.py` |
+| OECD country risk classification | After each OECD review (several times a year) | `fetch_country_data.py --source oecd_crc` |
+| World Bank exchange rates | Once a year | `fetch_country_data.py --source wb_fx` |
 | EBRD investments and project list | Monthly | Files into `data/raw/ebrd/inbox/`, then `build_ebrd.py` |
 | IFC reports | When a report is added | `sources/pdf_manifest.csv`, then `extract_pdfs.py` and `tag_blocks.py` |
 
@@ -142,7 +143,7 @@ uv run python src/fetch_projects.py      # 1. project data from the Finances One
 uv run python src/build_country_ref.py   # 2. regions, income groups, IFC regions
 uv run python src/extract_pdfs.py        # 3. text from PDF reports in data/raw/pdf/
 uv run python src/tag_blocks.py          # 4. country / industry / theme tags
-uv run python src/fetch_country_data.py  # 5. country risk data (OECD country risk classification)
+uv run python src/fetch_country_data.py  # 5. country data (OECD country risk, World Bank exchange rates)
 uv run python src/build_ebrd.py          # 6. EBRD data (see "Updating the EBRD data")
 uv run python src/export_powerbi.py      # 7. (optional) Parquet files for Power BI
 uv run streamlit run app/app.py          # dashboard at http://localhost:8501
@@ -219,13 +220,13 @@ Edit these files and re-run the relevant script to apply changes.
 | `documents` | table | One row per PDF report, with page count and file hash |
 | `doc_blocks` | table | Text blocks with page, position, language and kind (paragraph, caption, short, boilerplate, toc, reference, note, table, duplicate) |
 | `doc_text` | view | English body paragraphs only |
-| `country_indicators` | table | Country-level indicators (country × indicator × as-of date), e.g. OECD country risk |
+| `country_indicators` | table | Country-level indicators (country × indicator × as-of date): `oecd_crc`, `fx_depr_5y`, `fx_vol_10y` |
 | `ebrd_operations` | table | EBRD investments: one row per operation and country allocation, with debt / equity / guarantee amounts (€m), sector, public or private, signing date, and the linked project number and status |
 | `ebrd_operation_instruments` | table | EBRD amounts per operation and instrument (Debt, Equity, Guarantee) |
 | `ebrd_projects` | table | EBRD project list: one row per project, with status, stage and project page |
 | `ebrd_project_status_history` | table | EBRD project status at each saved CSV download |
 | `ebrd_status_changes` | view | EBRD projects whose status changed between the last two downloads |
-| `country_risk` | view | Latest value of each indicator per country, one row per country (used by the dashboard) |
+| `country_risk` | view | Latest value of each indicator per country, one row per country: OECD category, currency depreciation and volatility (used by the dashboard) |
 | `doc_countries` | table | Countries covered by each report |
 | `block_tags` | table | Country, industry and theme tags per paragraph |
 | `evidence` | view | Paragraph text with its tags in one row (used by the dashboard) |
