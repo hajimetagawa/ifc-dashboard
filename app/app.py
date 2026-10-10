@@ -1271,7 +1271,9 @@ with tab_country:
         k3.metric("Projects", f"{cp['project_number'].nunique():,}")
 
         ebrd_c, report_f = None, {}
-        left, right = st.columns([1, 1])
+        # ---- 数字（IFC と同じ国の EBRD を並べる）→ 大きい案件 → レポートの記述 の順に表示する
+        st.subheader(f"Investment in {country}")
+        left, right = st.columns(2)
         with left:
             g = cf.groupby(["board_fy", "instrument"])["amount"].sum().rename("value").reset_index()
             fig = px.bar(g, x="board_fy", y="value", color="instrument", title="IFC by fiscal year and instrument",
@@ -1282,8 +1284,11 @@ with tab_country:
             fig.update_yaxes(title_text=value_label, tickformat=",")
             show(fig)
 
+        with right:
             # 同じ国の EBRD（全業種・官民の両方）
-            if ebrd is not None and iso3 is not None:
+            if ebrd is None or iso3 is None:
+                st.caption("EBRD data is not available for this selection.")
+            else:
                 ec = ebrd[0][(ebrd[0]["iso3"] == iso3) & ebrd[0]["signing_year"].between(*fy)]
                 ebrd_c = ec
                 if ec.empty:
@@ -1295,7 +1300,7 @@ with tab_country:
                                  title=f"EBRD in {country}, by year of first signing (€ millions)",
                                  color_discrete_map=EBRD_SECTOR_GROUP_COLORS)
                     fig.update_traces(hovertemplate="%{x} · %{fullData.name}<br>€%{y:,.0f}m<extra></extra>")
-                    fig = style_fig(fig, 320)
+                    fig = style_fig(fig, 340)
                     fig.update_yaxes(tickformat=",")
                     show(fig)
                     e_sum = ec["ebrd_finance_eur_m"].sum()
@@ -1303,57 +1308,60 @@ with tab_country:
                                f"{ec.loc[ec['portfolio_class'] == 'State', 'ebrd_finance_eur_m'].sum() / e_sum:.0%} "
                                "to the public sector. All EBRD sectors; see tab 4 for the comparison with IFC.")
 
-            st.markdown("**Largest IFC projects**")
-            table_ = (cp.sort_values("amount", ascending=False)
-                      [["project_name", "company_name", "board_fy", "dept_name", "portfolio_stage", "amount",
-                        "project_url"]]
-                      .rename(columns={"project_name": "Project", "company_name": "Client", "board_fy": "FY",
-                                       "dept_name": "Department", "portfolio_stage": "Stage",
-                                       "amount": "Amount (US$m)", "project_url": "Disclosure"}))
-            st.dataframe(table_.head(20), hide_index=True, width="stretch",
-                         column_config={"Disclosure": st.column_config.LinkColumn(display_text="Open"),
-                                        "Amount (US$m)": st.column_config.NumberColumn(format="%,.1f")})
+        st.subheader("Largest IFC projects")
+        table_ = (cp.sort_values("amount", ascending=False)
+                  [["project_name", "company_name", "board_fy", "dept_name", "portfolio_stage", "amount",
+                    "project_url"]]
+                  .rename(columns={"project_name": "Project", "company_name": "Client", "board_fy": "FY",
+                                   "dept_name": "Department", "portfolio_stage": "Stage",
+                                   "amount": "Amount (US$m)", "project_url": "Disclosure"}))
+        st.dataframe(table_.head(20), hide_index=True, width="stretch",
+                     column_config={"Disclosure": st.column_config.LinkColumn(display_text="Open"),
+                                    "Amount (US$m)": st.column_config.NumberColumn(format="%,.1f")})
 
-        with right:
-            st.markdown("**What IFC reports say**")
-            if not ev or iso3 is None:
-                st.info("No IFC reports are available for this country / region yet.")
+        # ---- IFC レポートの記述（定性情報）
+        st.subheader("What IFC reports say")
+        if not ev or iso3 is None:
+            st.info("No IFC reports are available for this country / region yet.")
+        else:
+            e_ = ev["evidence"]
+            doc_ids = set(ev["doc_countries"].loc[ev["doc_countries"]["iso3"] == iso3, "doc_id"])
+            mentioned = e_["countries_mentioned"].apply(lambda x: iso3 in x)
+            ce = e_[e_["doc_id"].isin(doc_ids) | mentioned].copy()
+            # 対象国の資料の段落を先に、他国の資料での言及を後に並べる
+            ce["basis"] = ce["doc_id"].isin(doc_ids).map({True: 0, False: 1})
+            sectors = ([industry] if industry != ALL else BUSINESS_LINE_SECTORS.get(business_line, []))
+            if sectors:
+                label = ", ".join(sectors)
+                if st.checkbox(f"Only paragraphs related to {label}", value=True):
+                    ce = ce[ce["sectors"].apply(lambda x: any(s in x for s in sectors))]
+            if ce.empty:
+                st.info("No matching paragraphs (no report for this country, "
+                        "or no paragraph related to the selected sector).")
             else:
-                e_ = ev["evidence"]
-                doc_ids = set(ev["doc_countries"].loc[ev["doc_countries"]["iso3"] == iso3, "doc_id"])
-                mentioned = e_["countries_mentioned"].apply(lambda x: iso3 in x)
-                ce = e_[e_["doc_id"].isin(doc_ids) | mentioned].copy()
-                # 対象国の資料の段落を先に、他国の資料での言及を後に並べる
-                ce["basis"] = ce["doc_id"].isin(doc_ids).map({True: 0, False: 1})
-                sectors = ([industry] if industry != ALL else BUSINESS_LINE_SECTORS.get(business_line, []))
-                if sectors:
-                    label = ", ".join(sectors)
-                    if st.checkbox(f"Only paragraphs related to {label}", value=True):
-                        ce = ce[ce["sectors"].apply(lambda x: any(s in x for s in sectors))]
-                if ce.empty:
-                    st.info("No matching paragraphs (no report for this country, "
-                            "or no paragraph related to the selected sector).")
-                else:
-                    docs = ev["documents"][ev["documents"]["doc_id"].isin(ce["doc_id"].unique())]
-                    st.caption("Reports: " + "; ".join(f"{t} ({p_})" for t, p_ in zip(docs["title"], docs["pub_date"])))
-                    themes = ce.explode("themes").dropna(subset=["themes"])
-                    tcount = themes.groupby("themes").size().sort_values(ascending=True).reset_index(name="Paragraphs")
-                    fig = px.bar(tcount, x="Paragraphs", y="themes", orientation="h", title="Paragraphs by theme",
-                                 color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
-                    fig.update_traces(hovertemplate="%{y}: %{x} paragraph(s)<extra></extra>")
-                    show(style_fig(fig, max(260, 26 * len(tcount) + 80)))
-                    report_f = {"n_paragraphs": int((ce["kind"] == "paragraph").sum()),
-                                "top_themes": tcount.sort_values("Paragraphs", ascending=False)["themes"].head(3).tolist()}
-                    theme = st.selectbox("Read paragraphs by theme", ["All themes"] + tcount["themes"].tolist()[::-1])
-                    sel = ce if theme == "All themes" else ce[ce["themes"].apply(lambda x: theme in x)]
-                    sel = sel[sel["kind"] == "paragraph"].sort_values(["basis", "doc_id", "page", "block_no"])
-                    st.caption(f"{len(sel):,} paragraph(s) (showing the first 30)")
-                    for r in sel.head(30).itertuples():
-                        with st.container(border=True):
-                            st.caption(("[Mentioned in a report on another country] " if r.basis else "")
-                                       + f"{r.title} ({r.pub_date}), p.{r.page}"
-                                       + (f" | {', '.join(r.themes)}" if r.themes else ""))
-                            st.write(r.text)
+                docs = ev["documents"][ev["documents"]["doc_id"].isin(ce["doc_id"].unique())]
+                themes = ce.explode("themes").dropna(subset=["themes"])
+                tcount = themes.groupby("themes").size().sort_values(ascending=True).reset_index(name="Paragraphs")
+                fig = px.bar(tcount, x="Paragraphs", y="themes", orientation="h", title="Paragraphs by theme",
+                             color_discrete_sequence=[STAGE_COLORS["Active portfolio"]])
+                fig.update_traces(hovertemplate="%{y}: %{x} paragraph(s)<extra></extra>")
+                c1, c2 = st.columns([3, 2])
+                show(style_fig(fig, max(260, 26 * len(tcount) + 80)), c1)
+                c2.markdown("**Reports used**")
+                for t_, d_ in zip(docs["title"], docs["pub_date"]):
+                    c2.caption(f"{t_} ({d_})")
+                report_f = {"n_paragraphs": int((ce["kind"] == "paragraph").sum()),
+                            "top_themes": tcount.sort_values("Paragraphs", ascending=False)["themes"].head(3).tolist()}
+                theme = st.selectbox("Read paragraphs by theme", ["All themes"] + tcount["themes"].tolist()[::-1])
+                sel = ce if theme == "All themes" else ce[ce["themes"].apply(lambda x: theme in x)]
+                sel = sel[sel["kind"] == "paragraph"].sort_values(["basis", "doc_id", "page", "block_no"])
+                st.caption(f"{len(sel):,} paragraph(s) (showing the first 30)")
+                for r in sel.head(30).itertuples():
+                    with st.container(border=True):
+                        st.caption(("[Mentioned in a report on another country] " if r.basis else "")
+                                   + f"{r.title} ({r.pub_date}), p.{r.page}"
+                                   + (f" | {', '.join(r.themes)}" if r.themes else ""))
+                        st.write(r.text)
 
         # ---- Summary
         by_cl = cp.assign(c=cp["company_name"].fillna("(client not specified)")).groupby("c")["amount"].sum()
