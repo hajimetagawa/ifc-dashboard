@@ -121,6 +121,7 @@ Restart the dashboard after rebuilding the data; it caches data while running.
 | `notebooks/` | Exploration notebooks | Yes |
 | `app/` | Streamlit dashboard | Yes |
 | `content/commentary/` | Saved AI commentary (JSON), reviewed before saving | Yes |
+| `data/published/` | Database snapshot for the public dashboard (`src/publish_snapshot.py`) | Yes |
 | `docs/` | Data flow diagram (`data_flow.svg`) and the script that draws it | Yes |
 
 Data files are not committed. Everything in `data/` can be rebuilt by re-running the scripts;
@@ -279,6 +280,27 @@ Only the summary and its figures are sent to the model (`claude-sonnet-5-5` by d
 appear in those figures are listed for checking. *Save* writes `content/commentary/<tab>.json`; commit it to
 publish. A saved commentary is shown only when the filters match those used when it was generated, and it is not
 updated when the data change — regenerate it after a data update.
+
+## Deploying the dashboard (preview)
+
+The public dashboard runs on [Streamlit Community Cloud](https://share.streamlit.io) (free). Because `data/curated/`
+is not in Git, the app reads a published snapshot of the database, `data/published/ifc.duckdb`, which is committed.
+
+1. Stop the local dashboard and create the snapshot:
+   `uv run python src/publish_snapshot.py` (add `--without-ebrd` to leave the EBRD data out; see the note below).
+2. Commit and push: `git add . && git commit -m "Publish data snapshot" && git push`.
+3. On share.streamlit.io: *Create app* → repository `hajimetagawa/ifc-dashboard`, branch `main`, main file
+   `app/app.py`; in *Advanced settings* choose a Python version supported by the pinned libraries (3.12 or later).
+   Do not add an Anthropic key: AI commentary is generated locally only.
+4. Community Cloud installs `app/requirements.txt` (dashboard libraries only, same versions as `uv.lock`).
+
+To update the public app later, re-run step 1 and push; the app redeploys automatically. The app shows a
+*Preview* label while `APP_STAGE` in `app/app.py` is set.
+
+Data terms: IFC project data (World Bank Finances One, DS00499) is licensed CC BY 4.0. The EBRD website's terms of
+use allow personal, non-commercial use of its content without redistribution or derivative works. This project is
+personal and non-commercial; the app shows a disclaimer and attributes each source (`DISCLAIMER` in `app/app.py`).
+`--without-ebrd` publishes a snapshot without the EBRD data, in which case tab 4 says so.
 
 ## Using the data in Power BI
 

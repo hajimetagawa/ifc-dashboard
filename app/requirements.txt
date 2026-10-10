@@ -1,0 +1,7 @@
+# 公開版（Streamlit Community Cloud）で使うライブラリ。ダッシュボードに必要なものだけを、手元（uv.lock）と同じ版で指定する
+# Community Cloud は、app/app.py と同じフォルダにあるこのファイルを、プロジェクト直下の uv.lock より優先して使う
+streamlit==1.64.0
+pandas==3.0.6
+numpy==2.5.3
+plotly==7.1.0
+duckdb==1.5.6

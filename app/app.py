@@ -31,7 +31,23 @@ import summaries  # 各タブの最後の Summary（ルールに基づく文章�
 import watchlist  # watchlist: 試行的な注視リスト。削除するときはこの行と、render を呼ぶ行を消す
 
 ROOT = Path(__file__).resolve().parents[1]
-DB_PATH = Path(os.environ.get("IFC_DB", ROOT / "data" / "curated" / "ifc.duckdb"))
+APP_STAGE = "Preview"     # 公開版の段階（正式版にするときは空にする）
+# データベース: 環境変数 IFC_DB → 手元の作業用（data/curated）→ 公開用のスナップショット（data/published）の順に探す
+# 公開版（Streamlit Community Cloud）には data/curated がないため、src/publish_snapshot.py で作ったものを使う
+PUBLISHED_DB = ROOT / "data" / "published" / "ifc.duckdb"
+DB_PATH = Path(os.environ.get("IFC_DB") or next(
+    (p for p in (ROOT / "data" / "curated" / "ifc.duckdb", PUBLISHED_DB) if p.exists()),
+    ROOT / "data" / "curated" / "ifc.duckdb"))
+IS_PUBLISHED = DB_PATH.resolve() == PUBLISHED_DB.resolve()
+DISCLAIMER = (
+    "This dashboard is a personal, non-commercial project built for learning and research. It is not intended "
+    "for commercial use, and its accuracy, completeness and timeliness are not guaranteed: figures are derived "
+    "from public sources with simplifying assumptions (see *Notes on the data*) and should not be relied on for "
+    "investment, credit or other decisions. It is not affiliated with or endorsed by IFC, the World Bank Group, "
+    "the EBRD or the OECD. Source data remain the property of their publishers: IFC project data, World Bank "
+    "Group (CC BY 4.0); EBRD investment data and project list, © European Bank for Reconstruction and "
+    "Development, ebrd.com, used here for non-commercial purposes; OECD Country Risk Classification, OECD; "
+    "exchange rates, World Bank.")
 
 ALL = "All"
 DEFAULT_BUSINESS_LINE = "FIG"
@@ -525,6 +541,11 @@ def mix_shift(df: pd.DataFrame, col: str, n_years: int = 3) -> tuple[list[str], 
 
 # ---------------------------------------------------------------- header
 st.title("IFC Portfolio Explorer")
+if APP_STAGE:
+    st.caption(f":orange-badge[{APP_STAGE}] Work in progress: figures, wording and layout may still change. "
+               f"Data as of {AS_OF:%d %B %Y}. Built from public data only; not an official IFC or World Bank product.")
+with st.expander("Disclaimer and data sources"):
+    st.markdown(DISCLAIMER)
 st.markdown("What IFC invests in, where and how — and where the risks sit. Read the tabs from left to right: "
             "**1** the whole of IFC → **2** what the portfolio in your scope is made of → **3** where its risks "
             "concentrate → **4** how it compares with the EBRD → **5** one country in detail.")
@@ -1012,12 +1033,15 @@ with tab_risk:
 # ================================================================ 4 vs EBRD
 with tab_ebrd:
     if ebrd is None:
-        st.info("EBRD data is not loaded yet. Put the EBRD files in data/raw/ebrd/inbox/ and run src/build_ebrd.py.")
+        st.info("The comparison with the EBRD is not included in this public version." if IS_PUBLISHED else
+                "EBRD data is not loaded yet. Put the EBRD files in data/raw/ebrd/inbox/ and run src/build_ebrd.py.")
     else:
         e_ops, e_inst = ebrd
         e_last = int(e_ops["signing_year"].max())
         y0, y1 = fy[0], min(fy[1], e_last)
         st.markdown(WHY_EBRD)
+        st.caption("EBRD data: © European Bank for Reconstruction and Development (ebrd.com), used for "
+                   "non-commercial purposes only. See *Disclaimer and data sources* at the top of the page.")
         private_only = True        # IFC は民間向けだけなので、EBRD も民間向けで比べる（政府向けは「役割」の図で示す）
         e_as_of = str(pd.Timestamp(e_ops["as_of"].max()).date())
         rate, rate_src = EUR_USD.get(e_as_of, EUR_USD[max(EUR_USD)])
@@ -1287,7 +1311,8 @@ with tab_country:
         with right:
             # 同じ国の EBRD（全業種・官民の両方）
             if ebrd is None or iso3 is None:
-                st.caption("EBRD data is not available for this selection.")
+                st.caption("EBRD data is not included in this version." if ebrd is None and IS_PUBLISHED
+                           else "EBRD data is not available for this selection.")
             else:
                 ec = ebrd[0][(ebrd[0]["iso3"] == iso3) & ebrd[0]["signing_year"].between(*fy)]
                 ebrd_c = ec
@@ -1496,6 +1521,9 @@ with tab_notes:
   currently cover a few countries in Middle East and Central Asia.
 
 """ + summaries.THRESHOLDS_NOTE + """
+**Disclaimer**
+- """ + DISCLAIMER + """
+
 **Sources**
 - IFC Investment Services Projects, World Bank Group Finances One (dataset DS00499)
 - World Bank country classification API
