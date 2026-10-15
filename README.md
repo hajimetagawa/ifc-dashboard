@@ -1,5 +1,7 @@
 # IFC Portfolio Explorer
 
+https://ifc-dashboard-ht.streamlit.app/
+
 An interactive dashboard that combines IFC's structured project data with text from IFC publications,
 so that investment figures and the qualitative context behind them can be read side by side.
 
